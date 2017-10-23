@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<link>
+    <meta charset="UTF-8">
+    <title>Computer graphics</title>
+
+    <link rel="stylesheet" href="index.css">
+
+    <script src="index.js" defer></script>
+
+    <script id="fragment.lab#1" type="x-shader/x-fragment" src="lab1/fragment-shader.js" defer>
+        void main() {
+            gl_FragColor = vec4(0, 0.75, 0, 1);
+        }
+    </script>
+
+    <script id="vertex.lab#1"  type="x-shader/x-vertex" src="lab1/vertex-shader.js" defer>
+        attribute vec4 a_position;
+
+        void main() {
+            gl_Position = a_position;
+        }
+    </script>
+
+    <script src="lab1/index.js" defer></script>
+</head>
+<body class="root">
+    <canvas id="canvas.lab#1" class="size"></canvas>
+</body>
+</html>

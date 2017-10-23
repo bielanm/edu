@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="index.css">
+
+    <title>Decision theory</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js" defer></script>
+    <script src="lab1/index.js" defer></script>
+    <script src="lab2/index.js" defer></script>
+</head>
+<body>
+    <h2>Decision theory</h2>
+
+    <div id="lab1">
+        <h3>Lab 1</h3>
+        <input type="text" id="lab1in" class="width80"/>
+        <button id="lab1run">Start lab1 executing</button>
+        <button id="lab1clear">Clear</button>
+        <div class="flex">
+            <div>
+                <p id="lab1ParettoOut"></p>
+                <canvas id="lab1ParettoChart" width="400" height="400"></canvas>
+            </div>
+            <div>
+                <p id="lab1SlayterOut"></p>
+                <canvas id="lab1SlayterChart" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div id="lab2">
+        <h3>Lab 2</h3>
+        <input type="text" id="lab2in" class="width80"/>
+        <input type="text" id="lab2probsin" class="width80"/>
+        <button id="lab2run">Start lab1 executing</button>
+        <button id="lab2clear">Clear</button>
+        <p id="lab2out"></p>
+    </div>
+
+</body>
+</html>
