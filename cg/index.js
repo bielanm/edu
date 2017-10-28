@@ -1,3 +1,8 @@
+const BUTTONS = {
+    rightPlus: 43,
+    rightMinus: 45
+};
+
 function execute(callback) {
     callback();
 }
@@ -37,4 +42,11 @@ function createProgram(gl, vertexShader, fragmentShader) {
     return gl.getProgramParameter(program, gl.LINK_STATUS)
         ? program
         : gl.deleteProgram(program);
+}
+
+function addKeypressListener(button, listener) {
+    document.addEventListener('keypress', (event) => {
+        event.preventDefault();
+        if(event.keyCode == button) listener();
+    })
 }
