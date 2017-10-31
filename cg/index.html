@@ -24,14 +24,18 @@
 
     <script id="fragment.lab#2" type="x-shader/x-fragment" src="lab1/fragment-shader.js" defer>
         void main() {
-            gl_FragColor = vec4(0, 0, 0, 1);
+            gl_FragColor = vec4(0.3, 0.4, 0.7, 1.0);
         }
     </script>
     <script id="vertex.lab#2"  type="x-shader/x-vertex" src="lab1/vertex-shader.js" defer>
         attribute vec3 vertexPosition;
 
+        uniform mat4 modelUniform;
+        uniform mat4 perspectiveUniform;
+
+
         void main() {
-            gl_Position = vec4(vertexPosition, 1.0);
+            gl_Position = perspectiveUniform * modelUniform * vec4(vertexPosition, 1.0);
         }
     </script>
 
@@ -43,5 +47,6 @@
 </head>
 <body class="root">
     <canvas id="canvas.lab#1" class="size"></canvas>
+    <canvas id="canvas.lab#2" class="size"></canvas>
 </body>
 </html>

@@ -15,10 +15,6 @@ class GLoader {
         this.init();
     }
 
-    use(){
-        this.gl.useProgram(this.program);
-    }
-
     init() {
         this.gl.enable(this.gl.DEPTH_TEST);
     }
@@ -36,17 +32,12 @@ class GLoader {
     }
 
     initBuffer(name) {
-        this.gl.attributes[name] = this.gl.getAttribLocation(this.program, name);
         this.gl.buffers[name] = this.gl.createBuffer();
-        this.gl.enableVertexAttribArray(this.gl.attributes[name]);
     }
 
-    flushBuffer(name, vertexContainer, type) {
-        const buffer = this.gl.buffers[name];
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertexContainer.source), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(this.gl.attributes[name], vertexContainer.sizing, this.gl.FLOAT, false, 0, 0);
-        this.gl.drawArrays(type, 0, vertexContainer.count);
+    initAttributes(vertexAttribute) {
+        this.gl.attributes[vertexAttribute] = this.gl.getAttribLocation(this.program, vertexAttribute);
+        this.gl.enableVertexAttribArray(this.gl.attributes[vertexAttribute]);
     }
 
     initVertexShader(id) {
@@ -62,6 +53,7 @@ class GLoader {
             throw new Error('Create shaders at first');
 
         this.program = this.createProgram();
+        this.gl.useProgram(this.program);
     }
 
     createProgram() {
