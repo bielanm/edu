@@ -6,6 +6,7 @@
 
     <link rel="stylesheet" href="index.css">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.4.0/gl-matrix-min.js" defer></script>
     <script src="index.js" defer></script>
 
     <script id="fragment.lab#1" type="x-shader/x-fragment" src="lab1/fragment-shader.js" defer>
@@ -13,7 +14,6 @@
             gl_FragColor = vec4(0, 0.75, 0, 1);
         }
     </script>
-
     <script id="vertex.lab#1"  type="x-shader/x-vertex" src="lab1/vertex-shader.js" defer>
         attribute vec4 a_position;
 
@@ -22,7 +22,24 @@
         }
     </script>
 
-    <script src="lab1/index.js" defer></script>
+    <script id="fragment.lab#2" type="x-shader/x-fragment" src="lab1/fragment-shader.js" defer>
+        void main() {
+            gl_FragColor = vec4(0, 0, 0, 1);
+        }
+    </script>
+    <script id="vertex.lab#2"  type="x-shader/x-vertex" src="lab1/vertex-shader.js" defer>
+        attribute vec3 vertexPosition;
+
+        void main() {
+            gl_Position = vec4(vertexPosition, 1.0);
+        }
+    </script>
+
+
+
+    <script src="lab2/GLoader.js" defer></script>
+    <script src="lab2/VertexContainer.js" defer></script>
+    <script src="lab2/index.js" defer></script>
 </head>
 <body class="root">
     <canvas id="canvas.lab#1" class="size"></canvas>
