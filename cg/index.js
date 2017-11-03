@@ -1,10 +1,29 @@
 const BUTTONS = {
     rightPlus: 43,
-    rightMinus: 45
+    rightMinus: 45,
+    D: 100,
+    A: 97,
+    W: 119,
+    S: 115,
+    E: 101,
+    Q: 113,
+    R: 114,
+    T: 116,
+    Y: 121,
+    F: 102,
+    G: 103,
+    H: 104
 };
 
 function execute(callback) {
     callback();
+}
+
+function addKeypressListener(button, listener) {
+    document.addEventListener('keypress', (event) => {
+        event.preventDefault();
+        if(event.keyCode == button) listener();
+    })
 }
 
 // function createShader(gl, id) {
@@ -43,10 +62,3 @@ function execute(callback) {
 //         ? program
 //         : gl.deleteProgram(program);
 // }
-
-function addKeypressListener(button, listener) {
-    document.addEventListener('keypress', (event) => {
-        event.preventDefault();
-        if(event.keyCode == button) listener();
-    })
-}
