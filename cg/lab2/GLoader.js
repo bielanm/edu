@@ -11,6 +11,7 @@ class GLoader {
         this.gl.uniform = {};
         this.gl.attributes = {};
         this.gl.buffers = {};
+        this.gl.textures = {};
 
         this.init();
     }
@@ -31,13 +32,33 @@ class GLoader {
         this.gl.uniformMatrix4fv(this.gl.uniform[name], false, variable);
     }
 
-    initBuffer(name) {
+    initBuffer(name, vertexConteiner) {
         this.gl.buffers[name] = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.gl.buffers[name]);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertexConteiner.source), this.gl.STATIC_DRAW);
     }
 
-    initAttributes(vertexAttribute) {
-        this.gl.attributes[vertexAttribute] = this.gl.getAttribLocation(this.program, vertexAttribute);
-        this.gl.enableVertexAttribArray(this.gl.attributes[vertexAttribute]);
+    initTexture(name, url) {
+
+        const { gl } = this,
+            texture = gl.createTexture();
+        texture.image = new Image(256, 256);
+        texture.image.onload = () => {
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+        };
+
+        texture.image.src = url;
+        this.gl.textures[name] = texture;
+    }
+
+    initAttribute(name) {
+        this.gl.attributes[name] = this.gl.getAttribLocation(this.program, name);
+        this.gl.enableVertexAttribArray(this.gl.attributes[name]);
     }
 
     initVertexShader(id) {

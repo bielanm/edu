@@ -23,19 +23,28 @@
     </script>
 
     <script id="fragment.lab#2" type="x-shader/x-fragment" src="lab1/fragment-shader.js" defer>
-        void main() {
-            gl_FragColor = vec4(0.3, 0.4, 0.7, 1.0);
+        precision mediump float;
+        varying vec2 vTextureCoord;
+
+        uniform sampler2D uSampler;
+
+        void main(void) {
+            gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
         }
     </script>
     <script id="vertex.lab#2"  type="x-shader/x-vertex" src="lab1/vertex-shader.js" defer>
         attribute vec3 vertexPosition;
+        attribute vec2 vertexTexture;
 
         uniform mat4 modelUniform;
         uniform mat4 perspectiveUniform;
+        uniform mat4 cameraUniform;
 
+        varying vec2 vTextureCoord;
 
         void main() {
-            gl_Position = perspectiveUniform * modelUniform * vec4(vertexPosition, 1.0);
+            gl_Position = perspectiveUniform * cameraUniform * modelUniform * vec4(vertexPosition, 1.0);
+            vTextureCoord = vertexTexture;
         }
     </script>
 
@@ -46,6 +55,6 @@
     <script src="lab2/index.js" defer></script>
 </head>
 <body class="root">
-    <canvas id="canvas.lab#2" width="500" height="500" class="size"></canvas>
+    <canvas id="canvas"></canvas>
 </body>
 </html>
