@@ -4,18 +4,30 @@ function run() {
         modelMatrix = mat4.create(),
         perspectiveMatrix = mat4.create(),
         cameraMatrix = mat4.create(),
-        torVertexContaineer = new VertexContainer(3, getTorVertex(0.6, 0.3, 100)),
-        torVertexTextureContaineer = new VertexContainer(2, getTorVertexTexture(100));
+        figures = [];
+
+    figures.pop(new Tor('tor1', 0.6, 0.3, 10).withTexture('space'));
+    figures.pop(new Tor('tor2', 0.7, 0.1, 20).withTexture('space'));
+    figures.pop(new Tor('tor3', 0.7, 0.1, 50).withTexture('space'));
 
     loader.initVertexShader('vertex.lab#2');
     loader.initFragmentShader('fragment.lab#2');
     loader.initProgram();
 
-    loader.initAttribute('vertexPosition');
-    loader.initAttribute('vertexTexture');
+//    loader.initAttribute('vertexTexture');
 
-    loader.initBuffer('vertexPosition', torVertexContaineer);
-    loader.initBuffer('vertexTexture', torVertexTextureContaineer);
+    figures.forEach((figure) => {
+        loader.initAttribute(figure.id);
+        loader.initBuffer(figure.id, figure.points);
+        if(figure.isTexture) {
+            const textureId = `${figure.id}Texture`;
+            loader.initAttribute(textureId);
+            loader.initBuffer(textureId, figure.getTexturePoints());
+            loader.initTexture(textureId, figure.texture);
+        }
+    });
+    //loader.initBuffer('vertexTexture', torVertexTextureContaineer);
+
     loader.initTexture('torTexture', 'lab2/2.jpg');
 
     loader.initUniform('modelUniform');
@@ -23,7 +35,6 @@ function run() {
     loader.initUniform('cameraUniform');
 
     mat4.identity(modelMatrix);
-    mat4.identity(cameraMatrix);
     mat4.identity(cameraMatrix);
     mat4.perspective(perspectiveMatrix, 45*Math.PI/180, loader.gl.viewportWidth / loader.gl.viewportHeight, 0.1, 100.0);
 
@@ -34,61 +45,21 @@ function run() {
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers['vertexPosition']);
-        gl.vertexAttribPointer(gl.attributes['vertexPosition'], torVertexContaineer.sizing, gl.FLOAT, false, 0, 0);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers['vertexTexture']);
-        gl.vertexAttribPointer(gl.attributes['vertexTexture'], torVertexTextureContaineer.sizing, gl.FLOAT, false, 0, 0);
-
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, gl.textures['torTexture']);
-        gl.uniform1i(program.samplerUniform, 0);
-
         ctx.setUniform('modelUniform', modelMatrix);
         ctx.setUniform('perspectiveUniform', perspectiveMatrix);
         ctx.setUniform('cameraUniform', cameraMatrix);
-        gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers['vertexPosition']);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, torVertexContaineer.count);
-    }
 
-    function getTorVertex(R, r, steps) {
-        const array = [];
+        figures.forEach((figure) => {
+            gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers[figure.id]);
+            gl.vertexAttribPointer(gl.attributes[figure.id], figure.sizing, gl.FLOAT, false, 0, 0);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, figure.count);
+        });
+        // gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers['vertexTexture']);
+        // gl.vertexAttribPointer(gl.attributes['vertexTexture'], torVertexTextureContaineer.sizing, gl.FLOAT, false, 0, 0);
 
-        for(let i = 0; i <= steps; i++) {
-            const alpha = 2*Math.PI*i/steps,
-                nextAlpha = 2*Math.PI*(i+1)/steps;
-            for(let j = 0; j <= steps; j++) {
-                const betta = (2*Math.PI)*j/steps,
-                    x1 = (R + r*Math.cos(betta))*Math.cos(alpha),
-                    y1 = r*Math.sin(betta),
-                    z1 = (R + r*Math.cos(betta))*Math.sin(alpha),
-                    x2 = (R + r*Math.cos(betta))*Math.cos(nextAlpha),
-                    y2 = r*Math.sin(betta),
-                    z2 = (R + r*Math.cos(betta))*Math.sin(nextAlpha);
-
-                array.push(x1, y1, z1, x2, y2, z2);
-            }
-        }
-        return array;
-    }
-
-    function getTorVertexTexture(steps) {
-        const array = [];
-
-        for(let i = 0; i <= steps; i++) {
-            const alpha = i/steps,
-                nextAlpha = (i+1)/steps;
-            for(let j = 0; j <= steps; j++) {
-                const betta = j/steps,
-                    x1 = alpha,
-                    y1 = betta,
-                    x2 = nextAlpha,
-                    y2 = betta;
-
-                array.push(x1, y1, x2, y2);
-            }
-        }
-        return array;
+        // gl.activeTexture(gl.TEXTURE0);
+        // gl.bindTexture(gl.TEXTURE_2D, gl.textures['torTexture']);
+        // gl.uniform1i(program.samplerUniform, 0);
     }
 
     let rotationInitSpeed = (Math.PI/5)/60,
@@ -104,8 +75,8 @@ function run() {
         radiusChangeSpeed = 0;
 
     let recent = Date.now(),
-        position = [0, 0, -3],
-        rotation = [0, 1, 0],
+        position = [0, 0, 0],
+        rotation = [0, 0, 0],
         camera = { alpha: 0, betta: 0, radius: 0};
     function animate() {
         const now = Date.now(),
@@ -127,13 +98,14 @@ function run() {
         camera.betta += cameraBettaRotationSpeed*T;
         camera.radius += radiusChangeSpeed*T;
 
-        const zCamera = Math.cos(camera.alpha)*camera.radius,
-            yCamera = Math.sin(camera.betta)*camera.radius,
-            xCamera = Math.sin(camera.alpha)*camera.radius;
+        const zCamera = Math.cos(camera.betta)*Math.cos(camera.alpha)*camera.radius,
+            xCamera = Math.cos(camera.betta)*Math.sin(camera.alpha)*camera.radius,
+            yCamera = Math.sin(camera.betta)*camera.radius;
 
-        console.log(`Camera: x=${xCamera}, y=${yCamera}, z=${zCamera}`);
+        let yRotationAngle = Math.atan2(xCamera, zCamera);
 
         mat4.translate(cameraMatrix, cameraMatrix, [xCamera, yCamera, zCamera]);
+        mat4.rotateY(cameraMatrix, cameraMatrix, yRotationAngle);
 
         mat4.invert(cameraMatrix, cameraMatrix);
 
@@ -145,7 +117,7 @@ function run() {
     function tick() {
         requestAnimationFrame(tick);
         mat4.copy(modelStack, modelMatrix);
-        mat4.copy(modelStack, cameraMatrix);
+        mat4.copy(cameraStack, cameraMatrix);
         animate();
         loader.drawScene(drawSceneCallback);
         mat4.copy(modelMatrix, modelStack);
@@ -168,8 +140,9 @@ function run() {
 
     addKeydownListener(BUTTONS.left, () => cameraAlphaRotationSpeed -= rotationInitSpeed);
     addKeydownListener(BUTTONS.right, () => cameraAlphaRotationSpeed += rotationInitSpeed);
-    addKeydownListener(BUTTONS.up, () => cameraBettaRotationSpeed += rotationInitSpeed);
-    addKeydownListener(BUTTONS.down, () => cameraBettaRotationSpeed -= rotationInitSpeed);
+
+    // addKeydownListener(BUTTONS.up, () => cameraBettaRotationSpeed += rotationInitSpeed);
+    // addKeydownListener(BUTTONS.down, () => cameraBettaRotationSpeed -= rotationInitSpeed);
 
     addWheelListener((event) => {
         const sign = (event.deltaY > 0) ? 1 : -1;

@@ -73,8 +73,8 @@ execute(() => {
         drawScene();
     }
 
-    addKeypressListener(BUTTONS.rightPlus, () => updatePosition((dot, index) => (index % 2 == 1) ? dot + 0.125 : dot));
-    addKeypressListener(BUTTONS.rightMinus, () => updatePosition((dot, index) => (index % 2 == 1) ? dot - 0.125 : dot));
+    addKeydownListener(BUTTONS.rightPlus, () => updatePosition((dot, index) => (index % 2 == 1) ? dot + 0.125 : dot));
+    addKeydownListener(BUTTONS.rightMinus, () => updatePosition((dot, index) => (index % 2 == 1) ? dot - 0.125 : dot));
 
     drawScene();
 
