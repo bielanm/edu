@@ -19,12 +19,15 @@ class Figure {
 
     translate(point) {
         mat4.translate(this.model, this.model, [point.x, point.y, point.z]);
+        return this;
     }
 
     rotate(point) {
         mat4.rotateX(this.model, this.model, point.x);
         mat4.rotateY(this.model, this.model, point.y);
         mat4.rotateZ(this.model, this.model, point.z);
+
+        return this;
     }
 
     withTexture(texture) {

@@ -1,6 +1,6 @@
 class Color {
 
-    constructor(x, y, z, t) {
+    constructor(r, g, b, t) {
         this.r = r/256;
         this.g = g/256;
         this.b = b/256;

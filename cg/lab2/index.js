@@ -6,9 +6,9 @@ function run() {
         cameraMatrix = mat4.create(),
         figures = [];
 
-    figures.pop(new Tor('tor1', 0.6, 0.3, 10).withTexture('space'));
-    figures.pop(new Tor('tor2', 0.7, 0.1, 20).withTexture('space'));
-    figures.pop(new Tor('tor3', 0.7, 0.1, 50).withTexture('space'));
+    figures.pop(new Tor('tor1', 0.6, 0.3, 10).translate(new Point(0, 0, -7)));
+    figures.pop(new Tor('tor2', 0.7, 0.1, 20).translate(new Point(1, 0, -5)));
+    figures.pop(new Tor('tor3', 0.7, 0.1, 50).translate(new Point(-1, 0, -5)));
 
     loader.initVertexShader('vertex.lab#2');
     loader.initFragmentShader('fragment.lab#2');
@@ -28,7 +28,7 @@ function run() {
     });
     //loader.initBuffer('vertexTexture', torVertexTextureContaineer);
 
-    loader.initTexture('torTexture', 'lab2/2.jpg');
+    //loader.initTexture('torTexture', 'lab2/2.jpg');
 
     loader.initUniform('modelUniform');
     loader.initUniform('perspectiveUniform');
@@ -38,11 +38,14 @@ function run() {
     mat4.identity(cameraMatrix);
     mat4.perspective(perspectiveMatrix, 45*Math.PI/180, loader.gl.viewportWidth / loader.gl.viewportHeight, 0.1, 100.0);
 
+
+    const modelStack = mat4.create(),
+        cameraStack = mat4.create();
     function drawSceneCallback(ctx) {
         const { gl, program } = ctx;
 
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.clearColor(1.0, 1.0, 0.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         ctx.setUniform('modelUniform', modelMatrix);
@@ -50,9 +53,16 @@ function run() {
         ctx.setUniform('cameraUniform', cameraMatrix);
 
         figures.forEach((figure) => {
+            mat4.copy(modelStack, modelMatrix);
+            mat4.copy(modelMatrix, figure.model);
+            mat4.copy(cameraStack, cameraMatrix);
+
             gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers[figure.id]);
             gl.vertexAttribPointer(gl.attributes[figure.id], figure.sizing, gl.FLOAT, false, 0, 0);
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, figure.count);
+
+            mat4.copy(modelMatrix, modelStack);
+            mat4.copy(cameraMatrix, cameraStack);
         });
         // gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers['vertexTexture']);
         // gl.vertexAttribPointer(gl.attributes['vertexTexture'], torVertexTextureContaineer.sizing, gl.FLOAT, false, 0, 0);
@@ -79,75 +89,70 @@ function run() {
         rotation = [0, 0, 0],
         camera = { alpha: 0, betta: 0, radius: 0};
     function animate() {
-        const now = Date.now(),
-            T = (now - recent)/1000;
-
-        let [dx, dy, dz] = [translationSpeedX*T, translationSpeedY*T, translationSpeedZ*T],
-            [x, y, z] = position,
-            [a, b, c] = rotation,
-            [da, db, dc] = [rotationSpeedX*T, rotationSpeedY*T, rotationSpeedZ*T];
-        position = [dx + x, dy + y, dz + z];
-        rotation = [da + a, db + b, dc + c];
-
-        mat4.translate(modelMatrix, modelMatrix, position);
-        mat4.rotateX(modelMatrix, modelMatrix, a + da);
-        mat4.rotateY(modelMatrix, modelMatrix, b + db);
-        mat4.rotateZ(modelMatrix, modelMatrix, c + dc);
-
-        camera.alpha += cameraAlphaRotationSpeed*T;
-        camera.betta += cameraBettaRotationSpeed*T;
-        camera.radius += radiusChangeSpeed*T;
-
-        const zCamera = Math.cos(camera.betta)*Math.cos(camera.alpha)*camera.radius,
-            xCamera = Math.cos(camera.betta)*Math.sin(camera.alpha)*camera.radius,
-            yCamera = Math.sin(camera.betta)*camera.radius;
-
-        let yRotationAngle = Math.atan2(xCamera, zCamera);
-
-        mat4.translate(cameraMatrix, cameraMatrix, [xCamera, yCamera, zCamera]);
-        mat4.rotateY(cameraMatrix, cameraMatrix, yRotationAngle);
-
-        mat4.invert(cameraMatrix, cameraMatrix);
-
-        recent = now;
+        // const now = Date.now(),
+        //     T = (now - recent)/1000;
+        //
+        // let [dx, dy, dz] = [translationSpeedX*T, translationSpeedY*T, translationSpeedZ*T],
+        //     [x, y, z] = position,
+        //     [a, b, c] = rotation,
+        //     [da, db, dc] = [rotationSpeedX*T, rotationSpeedY*T, rotationSpeedZ*T];
+        // position = [dx + x, dy + y, dz + z];
+        // rotation = [da + a, db + b, dc + c];
+        //
+        // mat4.translate(modelMatrix, modelMatrix, position);
+        // mat4.rotateX(modelMatrix, modelMatrix, a + da);
+        // mat4.rotateY(modelMatrix, modelMatrix, b + db);
+        // mat4.rotateZ(modelMatrix, modelMatrix, c + dc);
+        //
+        // camera.alpha += cameraAlphaRotationSpeed*T;
+        // camera.betta += cameraBettaRotationSpeed*T;
+        // camera.radius += radiusChangeSpeed*T;
+        //
+        // const zCamera = Math.cos(camera.betta)*Math.cos(camera.alpha)*camera.radius,
+        //     xCamera = Math.cos(camera.betta)*Math.sin(camera.alpha)*camera.radius,
+        //     yCamera = Math.sin(camera.betta)*camera.radius;
+        //
+        // let yRotationAngle = Math.atan2(xCamera, zCamera);
+        //
+        // mat4.translate(cameraMatrix, cameraMatrix, [xCamera, yCamera, zCamera]);
+        // mat4.rotateY(cameraMatrix, cameraMatrix, yRotationAngle);
+        //
+        // mat4.invert(cameraMatrix, cameraMatrix);
+        //
+        // recent = now;
     }
 
-    const modelStack = mat4.create(),
-        cameraStack = mat4.create();
+
     function tick() {
         requestAnimationFrame(tick);
-        mat4.copy(modelStack, modelMatrix);
-        mat4.copy(cameraStack, cameraMatrix);
         animate();
         loader.drawScene(drawSceneCallback);
-        mat4.copy(modelMatrix, modelStack);
-        mat4.copy(cameraMatrix, cameraStack);
     }
 
-    addKeydownListener(BUTTONS.W, () => rotationSpeedX += rotationInitSpeed);
-    addKeydownListener(BUTTONS.S, () => rotationSpeedX -= rotationInitSpeed);
-    addKeydownListener(BUTTONS.E, () => rotationSpeedY += rotationInitSpeed);
-    addKeydownListener(BUTTONS.Q, () => rotationSpeedY -= rotationInitSpeed);
-    addKeydownListener(BUTTONS.D, () => rotationSpeedZ += rotationInitSpeed);
-    addKeydownListener(BUTTONS.A, () => rotationSpeedZ -= rotationInitSpeed);
-
-    addKeydownListener(BUTTONS.H, () => translationSpeedX += translationInitSpeed);
-    addKeydownListener(BUTTONS.F, () => translationSpeedX -= translationInitSpeed);
-    addKeydownListener(BUTTONS.Y, () => translationSpeedY += translationInitSpeed);
-    addKeydownListener(BUTTONS.R, () => translationSpeedY -= translationInitSpeed);
-    addKeydownListener(BUTTONS.T, () => translationSpeedZ += translationInitSpeed);
-    addKeydownListener(BUTTONS.G, () => translationSpeedZ -= translationInitSpeed);
-
-    addKeydownListener(BUTTONS.left, () => cameraAlphaRotationSpeed -= rotationInitSpeed);
-    addKeydownListener(BUTTONS.right, () => cameraAlphaRotationSpeed += rotationInitSpeed);
+    // addKeydownListener(BUTTONS.W, () => rotationSpeedX += rotationInitSpeed);
+    // addKeydownListener(BUTTONS.S, () => rotationSpeedX -= rotationInitSpeed);
+    // addKeydownListener(BUTTONS.E, () => rotationSpeedY += rotationInitSpeed);
+    // addKeydownListener(BUTTONS.Q, () => rotationSpeedY -= rotationInitSpeed);
+    // addKeydownListener(BUTTONS.D, () => rotationSpeedZ += rotationInitSpeed);
+    // addKeydownListener(BUTTONS.A, () => rotationSpeedZ -= rotationInitSpeed);
+    //
+    // addKeydownListener(BUTTONS.H, () => translationSpeedX += translationInitSpeed);
+    // addKeydownListener(BUTTONS.F, () => translationSpeedX -= translationInitSpeed);
+    // addKeydownListener(BUTTONS.Y, () => translationSpeedY += translationInitSpeed);
+    // addKeydownListener(BUTTONS.R, () => translationSpeedY -= translationInitSpeed);
+    // addKeydownListener(BUTTONS.T, () => translationSpeedZ += translationInitSpeed);
+    // addKeydownListener(BUTTONS.G, () => translationSpeedZ -= translationInitSpeed);
+    //
+    // addKeydownListener(BUTTONS.left, () => cameraAlphaRotationSpeed -= rotationInitSpeed);
+    // addKeydownListener(BUTTONS.right, () => cameraAlphaRotationSpeed += rotationInitSpeed);
 
     // addKeydownListener(BUTTONS.up, () => cameraBettaRotationSpeed += rotationInitSpeed);
     // addKeydownListener(BUTTONS.down, () => cameraBettaRotationSpeed -= rotationInitSpeed);
 
-    addWheelListener((event) => {
-        const sign = (event.deltaY > 0) ? 1 : -1;
-        radiusChangeSpeed += sign*translationInitSpeed;
-    });
+    // addWheelListener((event) => {
+    //     const sign = (event.deltaY > 0) ? 1 : -1;
+    //     radiusChangeSpeed += sign*translationInitSpeed;
+    // });
     tick();
 }
 
