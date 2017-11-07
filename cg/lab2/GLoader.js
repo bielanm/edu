@@ -28,8 +28,16 @@ class GLoader {
         this.gl.uniform[name] = this.gl.getUniformLocation(this.program, name);
     }
 
-    setUniform(name, variable) {
+    setUniformMatrix(name, variable) {
         this.gl.uniformMatrix4fv(this.gl.uniform[name], false, variable);
+    }
+
+    setFloatUniform(name, variable) {
+        this.gl.uniform1f(this.gl.uniform[name], variable);
+    }
+
+    setVec4Uniform(name, variable) {
+        this.gl.uniform4fv(this.gl.uniform[name],  variable);
     }
 
     initBuffer(name, vertexConteiner) {
@@ -112,7 +120,7 @@ class GLoader {
         this.gl.compileShader(shader);
 
         if(!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS))
-            throw new Error(`Error during compiling shader ${id}.`);
+            throw new Error(`Error during compiling shader ${id}: ${this.gl.getShaderInfoLog(shader)}`);
 
         return shader;
     }

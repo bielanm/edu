@@ -3,9 +3,10 @@ class Figure {
     constructor(id, points) {
         this.id = id;
 
-        this.points = points.map((point) => [point.x, point.y, point.z]);
+        this.points = [];
+        points.forEach((point) => Array.prototype.push.apply(this.points, [point.x, point.y, point.z]));
         this.sizing = 3;
-        this.count = this.points.length/this.sizing
+        this.count = points.length;
 
         this.model = mat4.create();
         mat4.identity(this.model);

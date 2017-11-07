@@ -23,19 +23,41 @@
     </script>
 
     <script id="fragment.lab#2" type="x-shader/x-fragment" src="lab1/fragment-shader.js" defer>
+        precision mediump float;
+
+        varying vec2 vTextureCoord;
+
+        uniform float ifTextureUniform;
+        uniform vec4 colorUniform;
+
+        uniform sampler2D uSampler;
+
         void main() {
-            gl_FragColor = vec4(0, 0, 0, 1);
+            if (ifTextureUniform > 0.5) {
+                gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+            } else {
+                gl_FragColor = colorUniform;
+            }
         }
     </script>
     <script id="vertex.lab#2"  type="x-shader/x-vertex" src="lab1/vertex-shader.js" defer>
+        precision mediump float;
+
         attribute vec3 vertexPosition;
+        attribute vec2 vertexTexturePosition;
 
         uniform mat4 modelUniform;
         uniform mat4 perspectiveUniform;
         uniform mat4 cameraUniform;
+        uniform float ifTextureUniform;
+
+        varying vec2 vTextureCoord;
 
         void main() {
             gl_Position = perspectiveUniform * cameraUniform * modelUniform * vec4(vertexPosition, 1.0);
+            if (ifTextureUniform > 0.5) {
+                vTextureCoord = vertexTexturePosition;
+            }
         }
     </script>
 
