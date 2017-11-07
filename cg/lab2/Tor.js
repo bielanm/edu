@@ -41,7 +41,7 @@ class Tor extends Figure {
                     x2 = nextAlpha,
                     y2 = betta;
 
-                array.push(new Point(x1, y1, 0), new Point(x2, y2, 0));
+                array.push(x1, y1, x2, y2);
             }
         }
         return array;

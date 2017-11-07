@@ -6,9 +6,9 @@ function run() {
         cameraMatrix = mat4.create(),
         figures = [];
 
-    figures.push(new Tor('tor1', 0.6, 0.3, 10).translate(new Point(0, 0, -7)));
-    figures.push(new Tor('tor2', 0.7, 0.1, 20).translate(new Point(1, 0, -5)));
-    figures.push(new Tor('tor3', 0.7, 0.1, 50).translate(new Point(-3, 0, -5)));
+    figures.push(new Tor('tor1', 0.6, 0.3, 10).translate(new Point(0, 0, -7)).withTexture('lab2/space.jpg'));
+    figures.push(new Tor('tor2', 0.7, 0.1, 20).translate(new Point(1, 0, -5)).withTexture('lab2/space.jpg'));
+    figures.push(new Tor('tor3', 0.7, 0.1, 50).translate(new Point(-3, 0, -5)).withTexture('lab2/space.jpg'));
 
     loader.initVertexShader('vertex.lab#2');
     loader.initFragmentShader('fragment.lab#2');
@@ -30,6 +30,7 @@ function run() {
     loader.initUniform('perspectiveUniform');
     loader.initUniform('cameraUniform');
     loader.initUniform('ifTextureUniform');
+    loader.initUniform('textureUniform');
     loader.initUniform('colorUniform');
 
     mat4.identity(modelMatrix);
@@ -46,27 +47,31 @@ function run() {
         gl.clearColor(1.0, 1.0, 0.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        ctx.setUniformMatrix('cameraUniform', cameraMatrix);
-        ctx.setUniformMatrix('perspectiveUniform', perspectiveMatrix);
-
         figures.forEach((figure) => {
             mat4.copy(modelStack, modelMatrix);
             mat4.copy(modelMatrix, figure.model);
             mat4.copy(cameraStack, cameraMatrix);
 
-            const color = figure.color;
-            ctx.setVec4Uniform('colorUniform', [color.r, color.g, color.b, color.t]);
-            ctx.setUniformMatrix('modelUniform', modelMatrix);
-            ctx.setFloatUniform('ifTexture', figure.isTexture ? 1.0 : 0.0);
-
+            gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers[figure.id]);
+            gl.vertexAttribPointer(gl.attributes['vertexPosition'], figure.sizing, gl.FLOAT, false, 0, 0);
             if(figure.isTexture) {
+                const textureId = `${figure.id}Texture`;
+                gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers[textureId]);
+                gl.vertexAttribPointer(gl.attributes['vertexTexturePosition'], 2, gl.FLOAT, false, 0, 0);
+
                 gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, gl.textures[figure.texture]);
-                gl.uniform1i(program.samplerUniform, 0);
+                gl.bindTexture(gl.TEXTURE_2D, gl.textures[textureId]);
             }
 
+            const color = figure.color;
+            ctx.setUniform1i('textureUniform', 0);
+            ctx.setUniformMatrix('cameraUniform', cameraMatrix);
+            ctx.setUniformMatrix('perspectiveUniform', perspectiveMatrix);
+            ctx.setVec4Uniform('colorUniform', [color.r, color.g, color.b, color.t]);
+            ctx.setUniformMatrix('modelUniform', modelMatrix);
+            ctx.setFloatUniform('ifTextureUniform', figure.isTexture ? 1.0 : 0.0);
+
             gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers[figure.id]);
-            gl.vertexAttribPointer('vertexPosition', figure.sizing, gl.FLOAT, false, 0, 0);
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, figure.count);
 
             mat4.copy(modelMatrix, modelStack);

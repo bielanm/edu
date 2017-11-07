@@ -40,6 +40,10 @@ class GLoader {
         this.gl.uniform4fv(this.gl.uniform[name],  variable);
     }
 
+    setUniform1i(name, variable) {
+        this.gl.uniform1i(this.gl.uniform[name], variable);
+    }
+
     initBuffer(name, vertexConteiner) {
         this.gl.buffers[name] = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.gl.buffers[name]);

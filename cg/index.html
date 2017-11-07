@@ -30,11 +30,11 @@
         uniform float ifTextureUniform;
         uniform vec4 colorUniform;
 
-        uniform sampler2D uSampler;
+        uniform sampler2D textureUniform;
 
         void main() {
             if (ifTextureUniform > 0.5) {
-                gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+                gl_FragColor = texture2D(textureUniform, vec2(vTextureCoord.s, vTextureCoord.t));
             } else {
                 gl_FragColor = colorUniform;
             }
