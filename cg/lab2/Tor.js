@@ -1,5 +1,6 @@
-function getTorPoints (R, r, accuracy) {
-    const array = [];
+function getTorPoints (R, r, accuracy, projectionVector) {
+    const array = [],
+        [xP, yP, zP] = projectionVector;
 
     for(let i = 0; i <= accuracy; i++) {
         const alpha = 2*Math.PI*i/accuracy,
@@ -13,7 +14,7 @@ function getTorPoints (R, r, accuracy) {
                 y2 = r*Math.sin(betta),
                 z2 = (R + r*Math.cos(betta))*Math.sin(nextAlpha);
 
-            array.push(new Point(x1, y1, z1), new Point(x2, y2, z2));
+            array.push(new Point(x1*xP, y1*yP, z1*zP), new Point(x2*xP, y2*yP, z2*zP));
         }
     }
     return array;
@@ -22,7 +23,7 @@ function getTorPoints (R, r, accuracy) {
 class Tor extends Figure {
 
     constructor(id, R, r, accuracy) {
-        super(id, getTorPoints(R, r, accuracy));
+        super(id, getTorPoints(R, r, accuracy, [1, 1, 1]));
         this.accuracy = accuracy;
         this.R = R;
         this.r = r;
@@ -45,5 +46,9 @@ class Tor extends Figure {
             }
         }
         return array;
+    }
+
+    getProjection(vector) {
+        this.getTorPoints(this.R, this.r, this.accuracy, vector);
     }
 }

@@ -6,9 +6,9 @@ function run() {
         cameraMatrix = mat4.create(),
         figures = [];
 
-    figures.push(new Tor('tor1', 0.6, 0.3, 10).translate(new Point(0, 0, -7)).withTexture('lab2/space.jpg'));
-    figures.push(new Tor('tor2', 0.7, 0.1, 20).translate(new Point(1, 0, -5)).withTexture('lab2/space.jpg'));
-    figures.push(new Tor('tor3', 0.7, 0.1, 50).translate(new Point(-3, 0, -5)).withTexture('lab2/space.jpg'));
+    figures.push(new Tor('tor1', 0.6, 0.3, 10).translate(0, 0, -7).withTexture('lab2/space.jpg'));
+    figures.push(new Tor('tor2', 0.7, 0.1, 20).translate(1, 0, -5).withTexture('lab2/space.jpg'));
+    figures.push(new Tor('tor3', 0.7, 0.1, 50).translate(-3, 0, -5).withTexture('lab2/space.jpg'));
 
     loader.initVertexShader('vertex.lab#2');
     loader.initFragmentShader('fragment.lab#2');
@@ -19,6 +19,7 @@ function run() {
 
     figures.forEach((figure) => {
         loader.initBuffer(figure.id, figure.points);
+
         if(figure.isTexture) {
             const textureId = `${figure.id}Texture`;
             loader.initBuffer(textureId, figure.getTexturePoints());
@@ -49,7 +50,7 @@ function run() {
 
         figures.forEach((figure) => {
             mat4.copy(modelStack, modelMatrix);
-            mat4.copy(modelMatrix, figure.model);
+            mat4.copy(modelMatrix, figure.getModel());
             mat4.copy(cameraStack, cameraMatrix);
 
             gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers[figure.id]);
@@ -77,46 +78,18 @@ function run() {
             mat4.copy(modelMatrix, modelStack);
             mat4.copy(cameraMatrix, cameraStack);
         });
-        // gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers['vertexTexture']);
-        // gl.vertexAttribPointer(gl.attributes['vertexTexture'], torVertexTextureContaineer.sizing, gl.FLOAT, false, 0, 0);
-
-        // gl.activeTexture(gl.TEXTURE0);
-        // gl.bindTexture(gl.TEXTURE_2D, gl.textures['torTexture']);
-        // gl.uniform1i(program.samplerUniform, 0);
     }
 
-    let rotationInitSpeed = (Math.PI/5)/60,
-        rotationSpeedX = 0,
-        rotationSpeedY = 0,
-        rotationSpeedZ = 0,
-        translationInitSpeed = 1/25,
-        translationSpeedX = 0,
-        translationSpeedY = 0,
-        translationSpeedZ = 0,
-        cameraAlphaRotationSpeed = 0,
-        cameraBettaRotationSpeed = 0,
-        radiusChangeSpeed = 0;
-
     let recent = Date.now(),
-        position = [0, 0, 0],
-        rotation = [0, 0, 0],
         camera = { alpha: 0, betta: 0, radius: 0};
     function animate() {
-        // const now = Date.now(),
-        //     T = (now - recent)/1000;
-        //
-        // let [dx, dy, dz] = [translationSpeedX*T, translationSpeedY*T, translationSpeedZ*T],
-        //     [x, y, z] = position,
-        //     [a, b, c] = rotation,
-        //     [da, db, dc] = [rotationSpeedX*T, rotationSpeedY*T, rotationSpeedZ*T];
-        // position = [dx + x, dy + y, dz + z];
-        // rotation = [da + a, db + b, dc + c];
-        //
-        // mat4.translate(modelMatrix, modelMatrix, position);
-        // mat4.rotateX(modelMatrix, modelMatrix, a + da);
-        // mat4.rotateY(modelMatrix, modelMatrix, b + db);
-        // mat4.rotateZ(modelMatrix, modelMatrix, c + dc);
-        //
+        const now = Date.now(),
+            T = (now - recent) / 1000;
+
+        figures
+            .map((figure) => figure.move(T))
+            .map((figure) => figure.rotation(T));
+
         // camera.alpha += cameraAlphaRotationSpeed*T;
         // camera.betta += cameraBettaRotationSpeed*T;
         // camera.radius += radiusChangeSpeed*T;
@@ -135,12 +108,7 @@ function run() {
         // recent = now;
     }
 
-
-    function tick() {
-        requestAnimationFrame(tick);
-        animate();
-        loader.drawScene(drawSceneCallback);
-    }
+    const targetListener = new TargetListener();
 
     // addKeydownListener(BUTTONS.W, () => rotationSpeedX += rotationInitSpeed);
     // addKeydownListener(BUTTONS.S, () => rotationSpeedX -= rotationInitSpeed);
@@ -166,6 +134,12 @@ function run() {
     //     const sign = (event.deltaY > 0) ? 1 : -1;
     //     radiusChangeSpeed += sign*translationInitSpeed;
     // });
+
+    function tick() {
+        requestAnimationFrame(tick);
+        animate();
+        loader.drawScene(drawSceneCallback);
+    }
     tick();
 }
 
