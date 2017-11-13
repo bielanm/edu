@@ -1,14 +1,24 @@
 function run() {
     const canvas = document.getElementById('canvas'),
         loader = new GLoader(canvas),
-        modelMatrix = mat4.create(),
+        camera = new Camera().translate(5, 0, 0),
         perspectiveMatrix = mat4.create(),
-        cameraMatrix = mat4.create(),
         figures = [];
 
-    figures.push(new Tor('tor1', 0.6, 0.3, 10).translate(0, 0, -7).withTexture('lab2/space.jpg'));
-    figures.push(new Tor('tor2', 0.7, 0.1, 20).translate(1, 0, -5).withTexture('lab2/space.jpg'));
-    figures.push(new Tor('tor3', 0.7, 0.1, 50).translate(-3, 0, -5).withTexture('lab2/space.jpg'));
+    //---------------
+    const SCALE = 10;
+    //---------------
+
+    // const identity = mat4.create();
+    // mat4.identity(identity);
+
+
+    figures.push(new Tor('tor1', 6, 3, 10).translate(0, 0, 0).withTexture('img/thor1.png'));
+    figures.push(new Tor('tor2', 7, 1, 20).translate(0, 0, 0).withTexture('img/thor2.png'));
+    figures.push(new Tor('tor3', 7, 1, 50).translate(0, 0, 0).withTexture('img/thor2.png'));
+    figures.push(new Cone('ne-tor', 5, 2, 25).translate(0, 3, 0).withTexture('img/captain.png'));
+    figures.push(new Surface('sin(x)*cos(y)', (x, y) => Math.sin(x)*Math.cos(y), new Point(-5, 0, 0), new Point(5, 5, -10), 20).withTexture('img/grass.png').scale(1/SCALE, 1/SCALE, 1/SCALE).translate(0, -2.5, 0).rotate(Math.PI/2, 0, 0));
+    figures.forEach((figure) => figure.scale(1/SCALE, 1/SCALE, 1/SCALE));
 
     loader.initVertexShader('vertex.lab#2');
     loader.initFragmentShader('fragment.lab#2');
@@ -34,24 +44,15 @@ function run() {
     loader.initUniform('textureUniform');
     loader.initUniform('colorUniform');
 
-    mat4.identity(modelMatrix);
-    mat4.identity(cameraMatrix);
     mat4.perspective(perspectiveMatrix, 45*Math.PI/180, loader.gl.viewportWidth / loader.gl.viewportHeight, 0.1, 100.0);
-
-
-    const modelStack = mat4.create(),
-        cameraStack = mat4.create();
     function drawSceneCallback(ctx) {
         const { gl, program } = ctx;
 
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        gl.clearColor(1.0, 1.0, 0.0, 1.0);
+        gl.clearColor(.2, .2, .2, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         figures.forEach((figure) => {
-            mat4.copy(modelStack, modelMatrix);
-            mat4.copy(modelMatrix, figure.getModel());
-            mat4.copy(cameraStack, cameraMatrix);
 
             gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers[figure.id]);
             gl.vertexAttribPointer(gl.attributes['vertexPosition'], figure.sizing, gl.FLOAT, false, 0, 0);
@@ -64,7 +65,9 @@ function run() {
                 gl.bindTexture(gl.TEXTURE_2D, gl.textures[textureId]);
             }
 
-            const color = figure.color;
+            const color = figure.color,
+                modelMatrix = figure.getModel(),
+                cameraMatrix = camera.getModel();
             ctx.setUniform1i('textureUniform', 0);
             ctx.setUniformMatrix('cameraUniform', cameraMatrix);
             ctx.setUniformMatrix('perspectiveUniform', perspectiveMatrix);
@@ -74,14 +77,10 @@ function run() {
 
             gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers[figure.id]);
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, figure.count);
-
-            mat4.copy(modelMatrix, modelStack);
-            mat4.copy(cameraMatrix, cameraStack);
         });
     }
 
-    let recent = Date.now(),
-        camera = { alpha: 0, betta: 0, radius: 0};
+    let recent = Date.now();
     function animate() {
         const now = Date.now(),
             T = (now - recent) / 1000;
@@ -90,49 +89,32 @@ function run() {
             .map((figure) => figure.move(T))
             .map((figure) => figure.rotation(T));
 
-        // camera.alpha += cameraAlphaRotationSpeed*T;
-        // camera.betta += cameraBettaRotationSpeed*T;
-        // camera.radius += radiusChangeSpeed*T;
-        //
-        // const zCamera = Math.cos(camera.betta)*Math.cos(camera.alpha)*camera.radius,
-        //     xCamera = Math.cos(camera.betta)*Math.sin(camera.alpha)*camera.radius,
-        //     yCamera = Math.sin(camera.betta)*camera.radius;
-        //
-        // let yRotationAngle = Math.atan2(xCamera, zCamera);
-        //
-        // mat4.translate(cameraMatrix, cameraMatrix, [xCamera, yCamera, zCamera]);
-        // mat4.rotateY(cameraMatrix, cameraMatrix, yRotationAngle);
-        //
-        // mat4.invert(cameraMatrix, cameraMatrix);
-        //
-        // recent = now;
     }
 
-    const targetListener = new TargetListener();
-
-    // addKeydownListener(BUTTONS.W, () => rotationSpeedX += rotationInitSpeed);
-    // addKeydownListener(BUTTONS.S, () => rotationSpeedX -= rotationInitSpeed);
-    // addKeydownListener(BUTTONS.E, () => rotationSpeedY += rotationInitSpeed);
-    // addKeydownListener(BUTTONS.Q, () => rotationSpeedY -= rotationInitSpeed);
-    // addKeydownListener(BUTTONS.D, () => rotationSpeedZ += rotationInitSpeed);
-    // addKeydownListener(BUTTONS.A, () => rotationSpeedZ -= rotationInitSpeed);
-    //
-    // addKeydownListener(BUTTONS.H, () => translationSpeedX += translationInitSpeed);
-    // addKeydownListener(BUTTONS.F, () => translationSpeedX -= translationInitSpeed);
-    // addKeydownListener(BUTTONS.Y, () => translationSpeedY += translationInitSpeed);
-    // addKeydownListener(BUTTONS.R, () => translationSpeedY -= translationInitSpeed);
-    // addKeydownListener(BUTTONS.T, () => translationSpeedZ += translationInitSpeed);
-    // addKeydownListener(BUTTONS.G, () => translationSpeedZ -= translationInitSpeed);
-    //
-    // addKeydownListener(BUTTONS.left, () => cameraAlphaRotationSpeed -= rotationInitSpeed);
-    // addKeydownListener(BUTTONS.right, () => cameraAlphaRotationSpeed += rotationInitSpeed);
-
-    // addKeydownListener(BUTTONS.up, () => cameraBettaRotationSpeed += rotationInitSpeed);
-    // addKeydownListener(BUTTONS.down, () => cameraBettaRotationSpeed -= rotationInitSpeed);
-
+    // const moveableListener = new TargetListener(canvas)
+    //     .add(new Toggle('Camera', 'cameraImg'));
+    // figures.forEach((figure) => moveableListener.add(figure.name, `${figure.name}Toogle`));
+    // addKeydownListener(BUTTONS.W, () => moveableListener.apply((element) => element.increaseTranslationSpeedY()));
+    // addKeydownListener(BUTTONS.S, () => moveableListener.apply((element) => element.decreaseTranslationSpeedY()));
+    // addKeydownListener(BUTTONS.D, () => moveableListener.apply((element) => element.increaseTranslationSpeedX()));
+    // addKeydownListener(BUTTONS.A, () => moveableListener.apply((element) => element.decreaseTranslationSpeedX()));
     // addWheelListener((event) => {
-    //     const sign = (event.deltaY > 0) ? 1 : -1;
-    //     radiusChangeSpeed += sign*translationInitSpeed;
+    //     const away = (event.deltaY > 0) ? true  : false;
+    //     away
+    //         ? moveableListener.apply((element) => element.increaseTranslationSpeedZ)
+    //         : moveableListener.apply((element) => element.decreaseTranslationSpeedZ);
+    // });    // const moveableListener = new TargetListener(canvas)
+    //     .add(new Toggle('Camera', 'cameraImg'));
+    // figures.forEach((figure) => moveableListener.add(figure.name, `${figure.name}Toogle`));
+    // addKeydownListener(BUTTONS.W, () => moveableListener.apply((element) => element.increaseTranslationSpeedY()));
+    // addKeydownListener(BUTTONS.S, () => moveableListener.apply((element) => element.decreaseTranslationSpeedY()));
+    // addKeydownListener(BUTTONS.D, () => moveableListener.apply((element) => element.increaseTranslationSpeedX()));
+    // addKeydownListener(BUTTONS.A, () => moveableListener.apply((element) => element.decreaseTranslationSpeedX()));
+    // addWheelListener((event) => {
+    //     const away = (event.deltaY > 0) ? true  : false;
+    //     away
+    //         ? moveableListener.apply((element) => element.increaseTranslationSpeedZ)
+    //         : moveableListener.apply((element) => element.decreaseTranslationSpeedZ);
     // });
 
     function tick() {

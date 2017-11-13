@@ -1,3 +1,9 @@
+Array.prototype.pushReduce = function (callback) {
+    return this.reduce((acc, element) => {
+        Array.prototype.push.apply(acc, callback(element));
+        return acc;
+    }, [])
+};
 const BUTTONS = {
     rightPlus: 43,
     rightMinus: 45,
@@ -36,7 +42,7 @@ function addWheelListener(listener) {
 function resize() {
     const canvas = document.getElementById('canvas');
     canvas.style.width = canvas.width = window.innerWidth;
-    canvas.style.height = canvas.height = window.innerHeight;
+    canvas.style.height = canvas.height = window.innerHeight*0.9;
     run();
 }
 window.addEventListener('resize', resize, false);
