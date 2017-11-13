@@ -1,4 +1,4 @@
-function getKonusPoints (h, r, accuracy, projection) {
+function getConePoints (h, r, accuracy, projection) {
     const angle = 2*Math.PI/accuracy,
         points = [],
         [px, py, pz] = projection,
@@ -20,7 +20,7 @@ function getKonusPoints (h, r, accuracy, projection) {
 class Cone extends Figure {
 
     constructor(id, h, r, accuracy) {
-        super(id, getKonusPoints(h, r, accuracy, [1, 1, 1]));
+        super(id, getConePoints(h, r, accuracy, [1, 1, 1]));
         this.h = h;
         this.r = r;
         this.accuracy = accuracy;
@@ -45,6 +45,26 @@ class Cone extends Figure {
         }
 
         return points;
+    }
+
+    getLightingNormal (projection = [1, 1, 1]) {
+        const { h, r, accuracy } = this,
+            angle = 2*Math.PI/accuracy,
+            points = [],
+            [px, py, pz] = projection,
+            zero = new Vector(0, -1, 0),
+            vertex = new Point(0, 1, 0);
+
+        for (let i = 0; i < accuracy; i++) {
+            const alpha = i*angle,
+                betta = (i + 1)*angle,
+                one = new Vector(0, -1, 0),
+                second = new Vector(0, -1, 0);
+
+            points.push(second, vertex, one, second, zero, one);
+        }
+
+        return points.pushReduce((vector) => [vector.x, vector.y, vector.z]);
     }
 
     getProjection(vector) {

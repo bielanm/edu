@@ -26,6 +26,7 @@
         precision mediump float;
 
         varying vec2 vTextureCoord;
+        varying vec3 vLightWeighting;
 
         uniform float ifTextureUniform;
         uniform vec4 colorUniform;
@@ -34,7 +35,8 @@
 
         void main() {
             if (ifTextureUniform > 0.5) {
-                gl_FragColor = texture2D(textureUniform, vec2(vTextureCoord.s, vTextureCoord.t));
+                vec4 textureColor = texture2D(textureUniform, vec2(vTextureCoord.s, vTextureCoord.t));
+                gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
             } else {
                 gl_FragColor = colorUniform;
             }
@@ -45,18 +47,34 @@
 
         attribute vec3 vertexPosition;
         attribute vec2 vertexTexturePosition;
+        attribute vec3 vertexNormal;
 
         uniform mat4 modelUniform;
         uniform mat4 perspectiveUniform;
         uniform mat4 cameraUniform;
         uniform float ifTextureUniform;
 
+        uniform mat3 normalUniform;
+        uniform vec3 lightingDirection;
+        uniform vec3 directionalColor;
+        uniform vec3 ambientColor;
+        uniform bool useLighting;
+
         varying vec2 vTextureCoord;
+        varying vec3 vLightWeighting;
 
         void main() {
             gl_Position = perspectiveUniform * cameraUniform * modelUniform * vec4(vertexPosition, 1.0);
             if (ifTextureUniform > 0.5) {
                 vTextureCoord = vertexTexturePosition;
+            }
+
+            if (!useLighting) {
+                vLightWeighting = vec3(1.0, 1.0, 1.0);
+            } else {
+                vec3 transformedNormal = normalUniform * vertexNormal;
+                float directionalLightWeighting = max(dot(transformedNormal, lightingDirection), 0.0);
+                vLightWeighting = ambientColor + directionalColor * directionalLightWeighting;
             }
         }
     </script>

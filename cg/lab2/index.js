@@ -3,7 +3,13 @@ function run() {
         loader = new GLoader(canvas),
         camera = new Camera().translate(5, 0, 0),
         perspectiveMatrix = mat4.create(),
-        figures = [];
+        normalMatrix = mat3.create(),
+        figures = [],
+        lightingDirection = [0, 0, -1],
+        adjustedLD = vec3.create();
+
+        vec3.normalize(lightingDirection, adjustedLD);
+        vec3.scale(adjustedLD, -1);
 
     //---------------
     const SCALE = 10;
@@ -17,7 +23,7 @@ function run() {
     figures.push(new Tor('tor2', 7, 1, 20).translate(0, 0, 0).withTexture('img/thor2.png'));
     figures.push(new Tor('tor3', 7, 1, 50).translate(0, 0, 0).withTexture('img/thor2.png'));
     figures.push(new Cone('ne-tor', 5, 2, 25).translate(0, 3, 0).withTexture('img/captain.png'));
-    figures.push(new Surface('sin(x)*cos(y)', (x, y) => Math.sin(x)*Math.cos(y), new Point(-5, 0, 0), new Point(5, 5, -10), 20).withTexture('img/grass.png').scale(1/SCALE, 1/SCALE, 1/SCALE).translate(0, -2.5, 0).rotate(Math.PI/2, 0, 0));
+    //figures.push(new Surface('sin(x)*cos(y)', (x, y) => Math.sin(x)*Math.cos(y), new Point(-5, 0, 0), new Point(5, 5, -10), 20).withTexture('img/grass.png').scale(1/SCALE, 1/SCALE, 1/SCALE).translate(0, -2.5, 0).rotate(Math.PI/2, 0, 0));
     figures.forEach((figure) => figure.scale(1/SCALE, 1/SCALE, 1/SCALE));
 
     loader.initVertexShader('vertex.lab#2');
@@ -26,6 +32,7 @@ function run() {
 
     loader.initAttribute('vertexPosition');
     loader.initAttribute('vertexTexturePosition');
+    loader.initAttribute('vertexNormal');
 
     figures.forEach((figure) => {
         loader.initBuffer(figure.id, figure.points);
@@ -34,6 +41,9 @@ function run() {
             const textureId = `${figure.id}Texture`;
             loader.initBuffer(textureId, figure.getTexturePoints());
             loader.initTexture(textureId, figure.texture);
+
+            const normalId = `${figure.id}Normal`;
+            loader.initBuffer(normalId, figure.getLightingNormal());
         }
     });
 
@@ -43,6 +53,12 @@ function run() {
     loader.initUniform('ifTextureUniform');
     loader.initUniform('textureUniform');
     loader.initUniform('colorUniform');
+
+    loader.initUniform('normalUniform');
+    loader.initUniform('lightingDirection');
+    loader.initUniform('useLighting');
+    loader.initUniform('ambientColor');
+    loader.initUniform('directionalColor');
 
     mat4.perspective(perspectiveMatrix, 45*Math.PI/180, loader.gl.viewportWidth / loader.gl.viewportHeight, 0.1, 100.0);
     function drawSceneCallback(ctx) {
@@ -65,15 +81,30 @@ function run() {
                 gl.bindTexture(gl.TEXTURE_2D, gl.textures[textureId]);
             }
 
+            const normalId = `${figure.id}Normal`;
+            gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers[normalId]);
+            gl.vertexAttribPointer(gl.attributes['vertexNormal'], 3, gl.FLOAT, false, 0, 0);
+
             const color = figure.color,
                 modelMatrix = figure.getModel(),
                 cameraMatrix = camera.getModel();
+
+            mat3.fromMat4(normalMatrix, modelMatrix);
+            mat3.invert(normalMatrix, normalMatrix);
+            mat3.transpose(normalMatrix, normalMatrix);
+
             ctx.setUniform1i('textureUniform', 0);
             ctx.setUniformMatrix('cameraUniform', cameraMatrix);
             ctx.setUniformMatrix('perspectiveUniform', perspectiveMatrix);
+            ctx.setUniformMatrix3('normalUniform', normalMatrix);
+            ctx.setVec3Uniform('lightingDirection', adjustedLD);
             ctx.setVec4Uniform('colorUniform', [color.r, color.g, color.b, color.t]);
             ctx.setUniformMatrix('modelUniform', modelMatrix);
             ctx.setFloatUniform('ifTextureUniform', figure.isTexture ? 1.0 : 0.0);
+
+            ctx.setUniform1i('useLighting', true);
+            ctx.setVec3Uniform('ambientColor', [.5, .5, .5]);
+            ctx.setVec3Uniform('directionalColor', [.7, .7, .7]);
 
             gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers[figure.id]);
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, figure.count);

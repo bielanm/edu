@@ -32,12 +32,21 @@ class GLoader {
         this.gl.uniformMatrix4fv(this.gl.uniform[name], false, variable);
     }
 
+    setUniformMatrix3(name, variable) {
+        this.gl.uniformMatrix3fv(this.gl.uniform[name], false, variable);
+    }
+
     setFloatUniform(name, variable) {
         this.gl.uniform1f(this.gl.uniform[name], variable);
     }
 
     setVec4Uniform(name, variable) {
-        this.gl.uniform4fv(this.gl.uniform[name],  variable);
+        this.gl.uniform4fv(this.gl.uniform[name], variable);
+    }
+
+
+    setVec3Uniform(name, variable) {
+        this.gl.uniform3fv(this.gl.uniform[name], variable);
     }
 
     setUniform1i(name, variable) {
