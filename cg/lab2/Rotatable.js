@@ -8,8 +8,8 @@ class RotatableOverPoint extends Moveable {
         this.ifRotateOverPoint = false;
         this.rotationR = 7;
         this.alpha = 0;
-        this.betta = 0;
-        this.rotationSpeedAlpha = angleSpeedStep*10;
+        this.betta = Math.PI/2;
+        this.rotationSpeedAlpha = angleSpeedStep*100;
         this.rotationSpeedBetta = angleSpeedStep*100;
     }
 
@@ -26,9 +26,12 @@ class RotatableOverPoint extends Moveable {
         this.alpha += this.rotationSpeedAlpha*T;
         this.betta += this.rotationSpeedBetta*T;
 
-        const x = this.rotationPoint.x + Math.sin(this.alpha)*this.rotationR,
-            z = this.rotationPoint.z + Math.cos(this.alpha)*this.rotationR,
-            y = this.rotationPoint.y + Math.sin(this.betta)*this.rotationR;
+        const y = this.rotationPoint.y + Math.cos(this.betta)*this.rotationR,
+            xzRadius = Math.abs(Math.sin(this.betta)*this.rotationR),
+            x = this.rotationPoint.x + Math.sin(this.alpha)*xzRadius,
+            z = this.rotationPoint.z + Math.cos(this.alpha)*xzRadius;
+
+        console.log(`X = ${x}, Y = ${y}, Z = ${z}`);
 
         this.setPosition(new Point(x, y, z));
         return this;
