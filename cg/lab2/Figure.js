@@ -1,6 +1,4 @@
-const rotationSpeedStep = (Math.PI/5)/60;
-
-class Figure extends Moveable {
+class Figure extends RotatableOverPoint {
 
     constructor(id, points) {
         super();

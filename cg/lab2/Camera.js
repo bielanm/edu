@@ -21,4 +21,5 @@ class Camera extends Moveable {
         mat4.lookAt(this.model, this.positionState, [lookAtX, lookAtY, lookAtZ], [normalX, normalY, normalZ]);
         return this.model;
     }
+
 }

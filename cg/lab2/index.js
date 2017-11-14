@@ -1,15 +1,15 @@
 function run() {
     const canvas = document.getElementById('canvas'),
         loader = new GLoader(canvas),
-        camera = new Camera().translate(5, 0, 0),
+        camera = new Camera().translate(0, 0, 5),
         perspectiveMatrix = mat4.create(),
         normalMatrix = mat3.create(),
         figures = [],
         lightingDirection = [0, 0, -1],
-        adjustedLD = vec3.create();
+        adjusted = vec3.create();
 
-        vec3.normalize(lightingDirection, adjustedLD);
-        vec3.scale(adjustedLD, -1);
+        vec3.normalize(adjusted, lightingDirection);
+        vec3.scale(adjusted, adjusted, -1);
 
     //---------------
     const SCALE = 10;
@@ -19,10 +19,10 @@ function run() {
     // mat4.identity(identity);
 
 
-    figures.push(new Tor('tor1', 6, 3, 10).translate(0, 0, 0).withTexture('img/thor1.png'));
-    figures.push(new Tor('tor2', 7, 1, 20).translate(0, 0, 0).withTexture('img/thor2.png'));
-    figures.push(new Tor('tor3', 7, 1, 50).translate(0, 0, 0).withTexture('img/thor2.png'));
-    figures.push(new Cone('ne-tor', 5, 2, 25).translate(0, 3, 0).withTexture('img/captain.png'));
+    figures.push(new Tor('tor1', 6, 3, 10).translate(0, 0, 0).withTexture('img/thor1.png').setRotationPoint(new Point(0, 0, 0)));
+    figures.push(new Tor('tor2', 7, 1, 20).translate(0, 0, 0).withTexture('img/thor2.png').setRotationPoint(new Point(0, 0, 0)));
+    figures.push(new Tor('tor3', 7, 1, 50).translate(0, 0, 0).withTexture('img/thor2.png').setRotationPoint(new Point(0, 0, 0)));
+    figures.push(new Cone('ne-tor', 5, 2, 25).translate(0, 3, 0).withTexture('img/captain.png').setRotationPoint(new Point(0, 0, 0)));
     //figures.push(new Surface('sin(x)*cos(y)', (x, y) => Math.sin(x)*Math.cos(y), new Point(-5, 0, 0), new Point(5, 5, -10), 20).withTexture('img/grass.png').scale(1/SCALE, 1/SCALE, 1/SCALE).translate(0, -2.5, 0).rotate(Math.PI/2, 0, 0));
     figures.forEach((figure) => figure.scale(1/SCALE, 1/SCALE, 1/SCALE));
 
@@ -97,7 +97,7 @@ function run() {
             ctx.setUniformMatrix('cameraUniform', cameraMatrix);
             ctx.setUniformMatrix('perspectiveUniform', perspectiveMatrix);
             ctx.setUniformMatrix3('normalUniform', normalMatrix);
-            ctx.setVec3Uniform('lightingDirection', adjustedLD);
+            ctx.setVec3Uniform('lightingDirection', adjusted);
             ctx.setVec4Uniform('colorUniform', [color.r, color.g, color.b, color.t]);
             ctx.setUniformMatrix('modelUniform', modelMatrix);
             ctx.setFloatUniform('ifTextureUniform', figure.isTexture ? 1.0 : 0.0);
@@ -120,6 +120,7 @@ function run() {
             .map((figure) => figure.move(T))
             .map((figure) => figure.rotation(T));
 
+        recent = now;
     }
 
     // const moveableListener = new TargetListener(canvas)
