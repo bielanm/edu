@@ -1,7 +1,7 @@
 function run() {
     const canvas = document.getElementById('canvas'),
         loader = new GLoader(canvas),
-        camera = new Camera().translate(0, 0, 5),
+        camera = new Camera().translate(0, 3, 0).withNormal(new Vector(-1, 0, 0)),
         perspectiveMatrix = mat4.create(),
         normalMatrix = mat3.create(),
         figures = [],
@@ -15,14 +15,9 @@ function run() {
     const SCALE = 10;
     //---------------
 
-    // const identity = mat4.create();
-    // mat4.identity(identity);
-
-
-    figures.push(new Tor('tor1', 6, 3, 10).translate(0, 0, 0).withTexture('img/thor1.png').setRotationPoint(new Point(0, 0, 0)));
-    figures.push(new Tor('tor2', 7, 1, 20).translate(0, 0, 0).withTexture('img/thor2.png').setRotationPoint(new Point(0, 0, 0)));
-    figures.push(new Tor('tor3', 7, 1, 50).translate(0, 0, 0).withTexture('img/thor2.png').setRotationPoint(new Point(0, 0, 0)));
-    figures.push(new Cone('ne-tor', 5, 2, 25).translate(0, 3, 0).withTexture('img/captain.png').setRotationPoint(new Point(0, 0, 0)));
+    figures.push(new Tor('tor2', 2, 0.5, 10).withTexture('img/space.jpg').withRotationPoint(new Point(0, 0, 0)).withRotationRadius(4));
+    figures.push(new Tor('tor3', 3, 1, 100).withTexture('img/space.jpg').withRotationPoint(new Point(0, 0, 0)).withRotationRadius(4));
+    figures.push(new Tor('tor1', 3, 1, 10).withTexture('img/space.jpg').withRotationPoint(new Point(0, 0, 0)).withRotationRadius(4));
     //figures.push(new Surface('sin(x)*cos(y)', (x, y) => Math.sin(x)*Math.cos(y), new Point(-5, 0, 0), new Point(5, 5, -10), 20).withTexture('img/grass.png').scale(1/SCALE, 1/SCALE, 1/SCALE).translate(0, -2.5, 0).rotate(Math.PI/2, 0, 0));
     figures.forEach((figure) => figure.scale(1/SCALE, 1/SCALE, 1/SCALE));
 
@@ -110,7 +105,6 @@ function run() {
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, figure.count);
         });
     }
-
     let recent = Date.now();
     function animate() {
         const now = Date.now(),
@@ -123,31 +117,27 @@ function run() {
         recent = now;
     }
 
-    // const moveableListener = new TargetListener(canvas)
-    //     .add(new Toggle('Camera', 'cameraImg'));
-    // figures.forEach((figure) => moveableListener.add(figure.name, `${figure.name}Toogle`));
-    // addKeydownListener(BUTTONS.W, () => moveableListener.apply((element) => element.increaseTranslationSpeedY()));
-    // addKeydownListener(BUTTONS.S, () => moveableListener.apply((element) => element.decreaseTranslationSpeedY()));
-    // addKeydownListener(BUTTONS.D, () => moveableListener.apply((element) => element.increaseTranslationSpeedX()));
-    // addKeydownListener(BUTTONS.A, () => moveableListener.apply((element) => element.decreaseTranslationSpeedX()));
-    // addWheelListener((event) => {
-    //     const away = (event.deltaY > 0) ? true  : false;
-    //     away
-    //         ? moveableListener.apply((element) => element.increaseTranslationSpeedZ)
-    //         : moveableListener.apply((element) => element.decreaseTranslationSpeedZ);
-    // });    // const moveableListener = new TargetListener(canvas)
-    //     .add(new Toggle('Camera', 'cameraImg'));
-    // figures.forEach((figure) => moveableListener.add(figure.name, `${figure.name}Toogle`));
-    // addKeydownListener(BUTTONS.W, () => moveableListener.apply((element) => element.increaseTranslationSpeedY()));
-    // addKeydownListener(BUTTONS.S, () => moveableListener.apply((element) => element.decreaseTranslationSpeedY()));
-    // addKeydownListener(BUTTONS.D, () => moveableListener.apply((element) => element.increaseTranslationSpeedX()));
-    // addKeydownListener(BUTTONS.A, () => moveableListener.apply((element) => element.decreaseTranslationSpeedX()));
-    // addWheelListener((event) => {
-    //     const away = (event.deltaY > 0) ? true  : false;
-    //     away
-    //         ? moveableListener.apply((element) => element.increaseTranslationSpeedZ)
-    //         : moveableListener.apply((element) => element.decreaseTranslationSpeedZ);
-    // });
+    const eventListener = new ButtonsListener();
+    eventListener.addListener({
+        wheel: (event) => (event.deltaY > 0) ? camera.increaseRotationSpeedR() : camera.decreaseRotationSpeedR(),
+        buttons: {
+            [BUTTONS.W]: () => figure.increaseRotationSpeedBetta(),
+            [BUTTONS.S]: () => figure.decreaseRotationSpeedBetta(),
+            [BUTTONS.D]: () => figure.increaseRotationSpeedAlpha(),
+            [BUTTONS.A]: () => figure.decreaseRotationSpeedAlpha()
+        }
+    });
+    figures.forEach((figure) => eventListener.addListener({
+        wheel: (event) => (event.deltaY > 0) ? figure.increaseRotationSpeedX() : figure.decreaseRotationSpeedX(),
+        buttons: {
+            [BUTTONS.W]: () => figure.increaseRotationSpeedY(),
+            [BUTTONS.S]: () => figure.decreaseRotationSpeedY(),
+            [BUTTONS.D]: () => figure.increaseRotationSpeedZ(),
+            [BUTTONS.A]: () => figure.decreaseRotationSpeedZ()
+        }
+    }));
+
+    eventListener.load();
 
     function tick() {
         requestAnimationFrame(tick);

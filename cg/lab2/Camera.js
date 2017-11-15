@@ -1,6 +1,6 @@
 
 
-class Camera extends Moveable {
+class Camera extends RotatableOverPoint {
 
     constructor() {
         super();
@@ -12,6 +12,11 @@ class Camera extends Moveable {
 
     withLookAt(point) {
         this.lookAt = point;
+    }
+
+    withNormal(normal) {
+        this.normal = normal;
+        return this;
     }
 
     getModel() {

@@ -1,4 +1,5 @@
-const angleSpeedStep = Math.PI*2/360;
+const angleSpeedStep = Math.PI*2/360,
+    ratationChange = 0.1;
 
 class RotatableOverPoint extends Moveable {
 
@@ -7,15 +8,31 @@ class RotatableOverPoint extends Moveable {
         this.rotationPoint = new Point(0, 0, 0);
         this.ifRotateOverPoint = false;
         this.rotationR = 7;
-        this.alpha = 0;
+        this.alpha = Math.PI/2;
         this.betta = Math.PI/2;
         this.rotationSpeedAlpha = angleSpeedStep*100;
-        this.rotationSpeedBetta = angleSpeedStep*100;
+        this.rotationSpeedBetta = 0;
     }
 
-    setRotationPoint(point) {
+    withAlpha(alpha) {
+        this.alpha = alpha;
+        return this;
+    }
+
+    withBetta(betta) {
+        this.betta = betta;
+        return this;
+    }
+
+
+    withRotationPoint(point) {
         this.ifRotateOverPoint = true;
         this.rotationPoint = point;
+        return this;
+    }
+
+    withRotationRadius(rotationR) {
+        this.rotationR = rotationR;
         return this;
     }
 
@@ -26,12 +43,11 @@ class RotatableOverPoint extends Moveable {
         this.alpha += this.rotationSpeedAlpha*T;
         this.betta += this.rotationSpeedBetta*T;
 
-        const y = this.rotationPoint.y + Math.cos(this.betta)*this.rotationR,
-            xzRadius = Math.abs(Math.sin(this.betta)*this.rotationR),
-            x = this.rotationPoint.x + Math.sin(this.alpha)*xzRadius,
-            z = this.rotationPoint.z + Math.cos(this.alpha)*xzRadius;
+        const gamma = Math.PI/2 + this.alpha;
 
-        console.log(`X = ${x}, Y = ${y}, Z = ${z}`);
+        const y = this.rotationPoint.y + Math.cos(this.betta)*this.rotationR,
+            x = this.rotationPoint.x + Math.cos(this.alpha)*this.rotationR,
+            z = this.rotationPoint.z + Math.cos(gamma)*this.rotationR;
 
         this.setPosition(new Point(x, y, z));
         return this;
@@ -45,8 +61,8 @@ class RotatableOverPoint extends Moveable {
         this.rotationSpeedBetta += angleSpeedStep;
     }
 
-    increaseTranslationSpeedR() {
-        this.r += translationInitSpeed;
+    increaseRotationSpeedR() {
+        this.rotationR += translationInitSpeed;
     }
 
     decreaseRotationSpeedAlpha() {
@@ -57,7 +73,8 @@ class RotatableOverPoint extends Moveable {
         this.rotationSpeedBetta -= angleSpeedStep;
     }
 
-    decreaseTranslationSpeedR() {
-        this.r -= translationInitSpeed;
+    decreaseRotationSpeedR() {
+        this.rotationR -= translationInitSpeed;
     }
+
 }

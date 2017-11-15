@@ -1,3 +1,5 @@
+const rotationSpeed = Math.PI/180/60;
+
 class Figure extends RotatableOverPoint {
 
     constructor(id, points) {
@@ -60,6 +62,30 @@ class Figure extends RotatableOverPoint {
         this.isTexture = false;
         this.color = color;
         return this;
+    }
+
+    increaseRotationSpeedX() {
+        this.translationSpeedX += rotationSpeed;
+    }
+
+    increaseRotationSpeedY() {
+        this.translationSpeedY += rotationSpeed;
+    }
+
+    increaseRotationSpeedZ() {
+        this.translationSpeedZ += rotationSpeed;
+    }
+
+    decreaseRotationSpeedX() {
+        this.translationSpeedX -= rotationSpeed;
+    }
+
+    decreaseRotationSpeedY() {
+        this.translationSpeedY -= rotationSpeed;
+    }
+
+    decreaseRotationSpeedZ() {
+        this.translationSpeedZ -= rotationSpeed;
     }
 
 }

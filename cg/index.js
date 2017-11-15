@@ -28,7 +28,7 @@ const BUTTONS = {
 function addKeydownListener(button, listener) {
     document.addEventListener('keydown', (event) => {
         event.preventDefault();
-        if(event.key == button) listener();
+        if(event.key == button) listener(event);
     })
 }
 
@@ -45,4 +45,6 @@ function resize() {
     canvas.style.height = canvas.height = window.innerHeight*0.9;
     run();
 }
+
+
 window.addEventListener('resize', resize, false);
