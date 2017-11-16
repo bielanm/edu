@@ -8,9 +8,9 @@ function run() {
             .withNormal(new Vector(0, 1, 0))
             .withRotationPoint(new Point(0, 0, 0)),
         lighting = new Lighting()
-            .withDirection(0, 0, -1)
             .withRotationPoint(new Point(0, 0, 0))
-            .withRotationRadius(7)
+            // .withRotationRadius(7)
+            .translate(5, 0, 0)
             .withAmbientColor(new Color(255, 0, 0))
             .withDirectionColor(new Color(0, 0, 255));
 

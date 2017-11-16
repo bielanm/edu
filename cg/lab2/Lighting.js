@@ -5,7 +5,7 @@ class Lighting extends RotatableOverPoint {
         super();
         this.ambientColor = new Color(255, 255, 255, 1);
         this.directionalColor = new Color(0, 0, 0, 1);
-        this.direction = new Vector(0, -1, 0);
+        this.direction = new Vector(1, 0, 0);
         this.adjusted = vec3.create();
         this.enabled = true;
         this.normalize();
@@ -55,7 +55,7 @@ class Lighting extends RotatableOverPoint {
     move(T) {
         super.move(T);
         const [x, y, z] = this.positionState;
-        this.direction = new Vector(this.rotationPoint.x-this.positionState.x, this.rotationPoint.y-this.positionState.y, this.rotationPoint.z-this.positionState.z);
+        this.direction = new Vector(this.rotationPoint.x-x, this.rotationPoint.y-y, this.rotationPoint.z-z);
         this.normalize();
 
         console.log(`Direction: X=${x}, Y=${y}, Z=${z}`);
