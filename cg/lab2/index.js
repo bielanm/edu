@@ -151,6 +151,12 @@ function run() {
             [BUTTONS.down]: () => figure.decreaseRotationSpeedY(),
             [BUTTONS.right]: () => figure.increaseRotationSpeedZ(),
             [BUTTONS.left]: () => figure.decreaseRotationSpeedZ()
+        },
+        color: {
+            label: 'Disable texture',
+            toggled: true,
+            onToggle: () => console.log('Toogle'),
+            onChange: () => console.log('Change')
         }
     }));
 

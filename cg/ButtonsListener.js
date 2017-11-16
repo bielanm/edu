@@ -11,17 +11,64 @@ class ButtonsListener {
         while (form.firstChild) form.removeChild(form.firstChild);
 
         this.elements.forEach((element) => {
+            const div = document.createElement('div');
+
             const input = document.createElement('input');
             input.id = element.id;
             input.type = 'radio';
             input.name = 'buttons-listener';
             input.onclick = () => this.target = element;
-            form.appendChild(input);
+            div.appendChild(input);
 
-            const label = document.createElement('label');
-            label.setAttribute('for', element.id);
-            label.innerHTML = element.id;
-            form.appendChild(label);
+            const inputLabel = document.createElement('label');
+            inputLabel.setAttribute('for', element.id);
+            inputLabel.innerHTML = element.id;
+            div.appendChild(inputLabel);
+
+            if(element.color) {
+                const { toggled, label } = element.color;
+
+                let toggleInput = null;
+                if(toggled) {
+                    toggleInput = document.createElement('input');
+                    toggleInput.id = `${element.id}Toggler`;
+                    toggleInput.type = 'checkbox';
+                    toggleInput.onchange = (event) => {
+                        if(this.target != element) return;
+
+                        const { onToggle } = this.target.color;
+
+                        if(onToggle)
+                            onToggle(event);
+                    };
+                    div.appendChild(toggleInput);
+
+                    const toggleLabel = document.createElement('label');
+                    toggleLabel.setAttribute('for', `${element.id}Toggler`);
+                    toggleLabel.innerHTML = label;
+                    div.appendChild(toggleLabel);
+                }
+
+
+                const colorInput = document.createElement('input');
+                colorInput.id = `${element.id}Color`;
+                colorInput.type = 'color';
+                colorInput.value= '#ff0000';
+                colorInput.onchange = (event) => {
+                    if(this.target != element) return;
+
+                    if(toggled)
+                        toggleInput.checked = false;
+
+                    const { onChange } = this.target.color;
+
+                    if(onChange)
+                        onChange(event);
+                };
+                div.appendChild(colorInput);
+            }
+
+            form.appendChild(div);
         });
 
         addWheelListener((event) => {
