@@ -24,11 +24,11 @@ class Figure extends RotatableOverPoint {
         mat4.identity(this.model);
 
         mat4.scale(this.model, this.model, [this.scaleX, this.scaleY, this.scaleZ]);
+        mat4.translate(this.model, this.model, this.positionState);
         mat4.rotateX(this.model, this.model, x);
         mat4.rotateY(this.model, this.model, y);
         mat4.rotateZ(this.model, this.model, z);
 
-        mat4.translate(this.model, this.model, this.positionState);
 
         return this.model;
     }
@@ -65,27 +65,27 @@ class Figure extends RotatableOverPoint {
     }
 
     increaseRotationSpeedX() {
-        this.translationSpeedX += rotationSpeed;
+        this.rotationSpeedX += rotationSpeed;
     }
 
     increaseRotationSpeedY() {
-        this.translationSpeedY += rotationSpeed;
+        this.rotationSpeedY += rotationSpeed;
     }
 
     increaseRotationSpeedZ() {
-        this.translationSpeedZ += rotationSpeed;
+        this.rotationSpeedZ += rotationSpeed;
     }
 
     decreaseRotationSpeedX() {
-        this.translationSpeedX -= rotationSpeed;
+        this.rotationSpeedX -= rotationSpeed;
     }
 
     decreaseRotationSpeedY() {
-        this.translationSpeedY -= rotationSpeed;
+        this.rotationSpeedY -= rotationSpeed;
     }
 
     decreaseRotationSpeedZ() {
-        this.translationSpeedZ -= rotationSpeed;
+        this.rotationSpeedZ -= rotationSpeed;
     }
 
 }

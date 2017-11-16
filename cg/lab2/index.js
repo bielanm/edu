@@ -1,23 +1,34 @@
 function run() {
     const canvas = document.getElementById('canvas'),
         loader = new GLoader(canvas),
-        camera = new Camera().translate(0, 3, 0).withNormal(new Vector(-1, 0, 0)),
         perspectiveMatrix = mat4.create(),
         normalMatrix = mat3.create(),
-        figures = [],
-        lightingDirection = [0, 0, -1],
-        adjusted = vec3.create();
-
-        vec3.normalize(adjusted, lightingDirection);
-        vec3.scale(adjusted, adjusted, -1);
+        camera = new Camera()
+            .translate(0, 5, 0)
+            .withNormal(new Vector(0, 1, 0))
+            .withRotationPoint(new Point(0, 0, 0)),
+        lighting = new Lighting()
+            .withDirection(0, 0, -1)
+            .withRotationPoint(new Point(0, 0, 0))
+            .withRotationRadius(7)
+            .withAmbientColor(new Color(255, 0, 0))
+            .withDirectionColor(new Color(0, 0, 255));
 
     //---------------
     const SCALE = 10;
     //---------------
 
-    figures.push(new Tor('tor2', 2, 0.5, 10).withTexture('img/space.jpg').withRotationPoint(new Point(0, 0, 0)).withRotationRadius(4));
-    figures.push(new Tor('tor3', 3, 1, 100).withTexture('img/space.jpg').withRotationPoint(new Point(0, 0, 0)).withRotationRadius(4));
-    figures.push(new Tor('tor1', 3, 1, 10).withTexture('img/space.jpg').withRotationPoint(new Point(0, 0, 0)).withRotationRadius(4));
+    const figures = [
+        new Tor('first', 3, 1, 5)
+            .translate(7, 0, 0)
+            .withTexture('img/space.jpg'),
+        new Tor('second', 3, 1, 20)
+            .translate(0, 0, -7)
+            .withTexture('img/space.jpg'),
+        new Tor('third', 3, 1, 100)
+            .translate(-7, 0, 0)
+            .withTexture('img/space.jpg')
+    ];
     //figures.push(new Surface('sin(x)*cos(y)', (x, y) => Math.sin(x)*Math.cos(y), new Point(-5, 0, 0), new Point(5, 5, -10), 20).withTexture('img/grass.png').scale(1/SCALE, 1/SCALE, 1/SCALE).translate(0, -2.5, 0).rotate(Math.PI/2, 0, 0));
     figures.forEach((figure) => figure.scale(1/SCALE, 1/SCALE, 1/SCALE));
 
@@ -57,10 +68,10 @@ function run() {
 
     mat4.perspective(perspectiveMatrix, 45*Math.PI/180, loader.gl.viewportWidth / loader.gl.viewportHeight, 0.1, 100.0);
     function drawSceneCallback(ctx) {
-        const { gl, program } = ctx;
+        const { gl } = ctx;
 
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        gl.clearColor(.2, .2, .2, 1.0);
+        gl.clearColor(0, 0, 0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         figures.forEach((figure) => {
@@ -92,14 +103,14 @@ function run() {
             ctx.setUniformMatrix('cameraUniform', cameraMatrix);
             ctx.setUniformMatrix('perspectiveUniform', perspectiveMatrix);
             ctx.setUniformMatrix3('normalUniform', normalMatrix);
-            ctx.setVec3Uniform('lightingDirection', adjusted);
             ctx.setVec4Uniform('colorUniform', [color.r, color.g, color.b, color.t]);
             ctx.setUniformMatrix('modelUniform', modelMatrix);
             ctx.setFloatUniform('ifTextureUniform', figure.isTexture ? 1.0 : 0.0);
 
-            ctx.setUniform1i('useLighting', true);
-            ctx.setVec3Uniform('ambientColor', [.5, .5, .5]);
-            ctx.setVec3Uniform('directionalColor', [.7, .7, .7]);
+            ctx.setVec3Uniform('lightingDirection', lighting.getAdjusted());
+            ctx.setUniform1i('useLighting', lighting.isOn());
+            ctx.setVec3Uniform('ambientColor', lighting.getAmbientColor());
+            ctx.setVec3Uniform('directionalColor', lighting.getDirectionalColor());
 
             gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers[figure.id]);
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, figure.count);
@@ -114,26 +125,41 @@ function run() {
             .map((figure) => figure.move(T))
             .map((figure) => figure.rotation(T));
 
+        camera.move(T);
+        lighting.move(T);
+
         recent = now;
     }
 
     const eventListener = new ButtonsListener();
     eventListener.addListener({
+        id: 'Lighting',
+        wheel: (event) => (event.deltaY > 0) ? lighting.increaseRotationSpeedR() : lighting.decreaseRotationSpeedR(),
+        buttons: {
+            [BUTTONS.W]: () => lighting.increaseRotationSpeedBetta(),
+            [BUTTONS.S]: () => lighting.decreaseRotationSpeedBetta(),
+            [BUTTONS.D]: () => lighting.increaseRotationSpeedAlpha(),
+            [BUTTONS.A]: () => lighting.decreaseRotationSpeedAlpha()
+        }
+    });
+    eventListener.addListener({
+        id: 'Camera',
         wheel: (event) => (event.deltaY > 0) ? camera.increaseRotationSpeedR() : camera.decreaseRotationSpeedR(),
         buttons: {
-            [BUTTONS.W]: () => figure.increaseRotationSpeedBetta(),
-            [BUTTONS.S]: () => figure.decreaseRotationSpeedBetta(),
-            [BUTTONS.D]: () => figure.increaseRotationSpeedAlpha(),
-            [BUTTONS.A]: () => figure.decreaseRotationSpeedAlpha()
+            [BUTTONS.W]: () => camera.increaseRotationSpeedBetta(),
+            [BUTTONS.S]: () => camera.decreaseRotationSpeedBetta(),
+            [BUTTONS.D]: () => camera.increaseRotationSpeedAlpha(),
+            [BUTTONS.A]: () => camera.decreaseRotationSpeedAlpha()
         }
     });
     figures.forEach((figure) => eventListener.addListener({
+        id: figure.id,
         wheel: (event) => (event.deltaY > 0) ? figure.increaseRotationSpeedX() : figure.decreaseRotationSpeedX(),
         buttons: {
-            [BUTTONS.W]: () => figure.increaseRotationSpeedY(),
-            [BUTTONS.S]: () => figure.decreaseRotationSpeedY(),
-            [BUTTONS.D]: () => figure.increaseRotationSpeedZ(),
-            [BUTTONS.A]: () => figure.decreaseRotationSpeedZ()
+            [BUTTONS.up]: () => figure.increaseRotationSpeedY(),
+            [BUTTONS.down]: () => figure.decreaseRotationSpeedY(),
+            [BUTTONS.right]: () => figure.increaseRotationSpeedZ(),
+            [BUTTONS.left]: () => figure.decreaseRotationSpeedZ()
         }
     }));
 
