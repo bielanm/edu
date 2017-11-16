@@ -29,18 +29,11 @@
         varying vec2 vTextureCoord;
         varying vec3 vLightWeighting;
 
-        uniform float ifTextureUniform;
-        uniform vec4 colorUniform;
-
         uniform sampler2D textureUniform;
 
         void main() {
-            if (ifTextureUniform > 0.5) {
-                vec4 textureColor = texture2D(textureUniform, vec2(vTextureCoord.s, vTextureCoord.t));
-                gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
-            } else {
-                gl_FragColor = colorUniform;
-            }
+            vec4 textureColor = texture2D(textureUniform, vec2(vTextureCoord.s, vTextureCoord.t));
+            gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
         }
     </script>
     <script id="vertex.lab#2"  type="x-shader/x-vertex" src="lab1/vertex-shader.js" defer>
@@ -53,7 +46,6 @@
         uniform mat4 modelUniform;
         uniform mat4 perspectiveUniform;
         uniform mat4 cameraUniform;
-        uniform float ifTextureUniform;
 
         uniform mat3 normalUniform;
         uniform vec3 lightingDirection;
@@ -66,9 +58,6 @@
 
         void main() {
             gl_Position = perspectiveUniform * cameraUniform * modelUniform * vec4(vertexPosition, 1.0);
-            if (ifTextureUniform > 0.5) {
-                vTextureCoord = vertexTexturePosition;
-            }
 
             if (!useLighting) {
                 vLightWeighting = vec3(1.0, 1.0, 1.0);
@@ -77,6 +66,7 @@
                 float directionalLightWeighting = max(dot(transformedNormal, lightingDirection), 0.0);
                 vLightWeighting = ambientColor + directionalColor * directionalLightWeighting;
             }
+            vTextureCoord = vertexTexturePosition;
         }
     </script>
 

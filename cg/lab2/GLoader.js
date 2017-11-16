@@ -63,6 +63,8 @@ class GLoader {
 
         const { gl } = this,
             texture = gl.createTexture();
+
+        texture.url = url;
         texture.image = new Image();
         texture.image.onload = () => {
             gl.bindTexture(gl.TEXTURE_2D, texture);

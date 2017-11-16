@@ -64,6 +64,23 @@ class Figure extends RotatableOverPoint {
         return this;
     }
 
+    getTextureURL() {
+        if(this.isTexture) {
+            return this.texture;
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = 512;
+        canvas.height = 512;
+
+        const ctx = canvas.getContext("2d"),
+            { r, g, b, a } = this.color.getOrigin();
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        return canvas.toDataURL("image/png");
+    }
+
     increaseRotationSpeedX() {
         this.rotationSpeedX += rotationSpeed;
     }

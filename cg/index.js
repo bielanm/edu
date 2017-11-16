@@ -22,7 +22,8 @@ const BUTTONS = {
     left: 'ArrowLeft',
     up: 'ArrowUp',
     right: 'ArrowRight',
-    down: 'ArrowDown'
+    down: 'ArrowDown',
+    shift: 'Shift'
 };
 
 function addKeydownListener(button, listener) {

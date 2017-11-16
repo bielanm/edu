@@ -57,10 +57,5 @@ class Lighting extends RotatableOverPoint {
         const [x, y, z] = this.positionState;
         this.direction = new Vector(this.rotationPoint.x-x, this.rotationPoint.y-y, this.rotationPoint.z-z);
         this.normalize();
-
-        console.log(`Direction: X=${x}, Y=${y}, Z=${z}`);
-        let [px, py, pz] = this.positionState;
-        console.log(`Position: X=${px}, Y=${py}, Z=${pz}`);
-
     }
 }
