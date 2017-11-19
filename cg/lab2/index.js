@@ -5,29 +5,43 @@ function run() {
         perspectiveMatrix = mat4.create(),
         normalMatrix = mat3.create(),
         camera = new Camera()
-            .translate(0, 5, 0)
+            .withRotationRadius(5)
+            .withAlpha(0)
+            .translate(new Point(5, 0, 0))
             .withNormal(new Vector(0, 1, 0))
             .withRotationPoint(new Point(0, 0, 0)),
-        lighting = new Lighting()
+        lighting = new SphereLighting(1)
+            .withRotationRadius(13)
+            .withBetta(Math.PI/4)
+            .withAlpha(Math.PI/4 - Math.PI/10)
+            .translate(new Point(12, 5, 0))
             .withRotationPoint(new Point(0, 0, 0))
-            // .withRotationRadius(7)
-            .translate(5, 0, 0)
             .withAmbientColor(new Color(255, 255, 255))
-            .withDirectionColor(new Color(255, 255, 255));
+            .withDirectionColor(new Color(255, 255, 255))
+            .withColor(new Color(255/10, 255/10, 255/10));
 
 
     const figures = [
-        new Tor('first', 3, 1, 5)
+        new Tor('tor1', 3, 1, 5)
+            .withColor(new Color(123, 109, 111))
             .translate(7, 0, 0)
             .withTexture('img/space.jpg'),
-        new Tor('second', 3, 1, 20)
+        new Tor('tor2', 3, 1, 20)
             .translate(0, 0, -7)
             .withTexture('img/space.jpg'),
-        new Tor('third', 3, 1, 100)
+        new Tor('tor3', 3, 1, 100)
             .translate(-7, 0, 0)
-            .withColor(new Color(255, 0, 0))
+            .withColor(new Color(0, 50, 20)),
+        new Cone('cone1', 3, 4, 10)
+            .translate(5, 2, 2)
+            .withColor(new Color(200, 120, 50)),
+        new Cone('cone2', 5, 2, 25)
+            .translate(-5, 1, 2)
+            .withColor(new Color(200, 120, 50)),
+        lighting,
+        new Surface('Math.sin(x)*Math.cos(x)', (x, y) => 10+10*Math.sin(x)*Math.cos(x), new Point(-SCALE, -SCALE, -SCALE), new Point(SCALE, SCALE, SCALE), 100)
+            .withColor(new Color(64, 64, 64))
     ];
-    //figures.push(new Surface('sin(x)*cos(y)', (x, y) => Math.sin(x)*Math.cos(y), new Point(-5, 0, 0), new Point(5, 5, -10), 20).withTexture('img/grass.png').scale(1/SCALE, 1/SCALE, 1/SCALE).translate(0, -2.5, 0).rotate(Math.PI/2, 0, 0));
     figures.forEach((figure) => figure.scale(1/SCALE, 1/SCALE, 1/SCALE));
 
     loader.initVertexShader('vertex.lab#2');
@@ -38,6 +52,12 @@ function run() {
     loader.initAttribute('vertexTexturePosition');
     loader.initAttribute('vertexNormal');
 
+
+    function initTextureBuffer(figure) {
+        const textureId = `${figure.id}Texture`;
+        loader.initTexture(textureId, figure.getTextureURL());
+    }
+
     figures.forEach((figure) => {
         loader.initBuffer(figure.id, figure.points);
 
@@ -46,7 +66,7 @@ function run() {
 
         const textureId = `${figure.id}Texture`;
         loader.initBuffer(textureId, figure.getTexturePoints());
-        loader.initTexture(textureId, figure.getTextureURL());
+        initTextureBuffer(figure);
     });
 
     loader.initUniform('modelUniform');
@@ -83,8 +103,7 @@ function run() {
             gl.bindBuffer(gl.ARRAY_BUFFER, gl.buffers[normalId]);
             gl.vertexAttribPointer(gl.attributes['vertexNormal'], 3, gl.FLOAT, false, 0, 0);
 
-            const color = figure.color,
-                modelMatrix = figure.getModel(),
+            const modelMatrix = figure.getModel(),
                 cameraMatrix = camera.getModel();
 
             mat3.fromMat4(normalMatrix, modelMatrix);
@@ -116,7 +135,7 @@ function run() {
             .map((figure) => figure.rotation(T));
 
         camera.move(T);
-        lighting.move(T);
+        //lighting.move(T);
 
         recent = now;
     }
@@ -155,8 +174,16 @@ function run() {
         color: {
             label: 'Disable texture',
             toggled: true,
-            onToggle: () => console.log('Toogle'),
-            onChange: () => console.log('Change')
+            onToggle: () => {
+                figure.toggleTexture();
+                initTextureBuffer(figure);
+            },
+            onChange: ({ r, g, b }) => {
+                figure.withColor(new Color(r, g, b));
+                initTextureBuffer(figure);
+            },
+            initToggle: !figure.isTexture,
+            initColor: figure.getColor().getOrigin()
         }
     }));
 

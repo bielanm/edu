@@ -1,5 +1,4 @@
-const angleSpeedStep = Math.PI*2/360,
-    ratationChange = 0.1;
+const angleSpeedStep = Math.PI*2/360;
 
 class RotatableOverPoint extends Moveable {
 
@@ -12,7 +11,7 @@ class RotatableOverPoint extends Moveable {
         this.betta = Math.PI/2;
         this.rotationSpeedAlpha = 0;
         this.rotationSpeedBetta = 0;
-        this.rotationSpeedR = 0;
+        this.lastDelta = 0;
 
         this.recalculateR();
     }
@@ -56,20 +55,22 @@ class RotatableOverPoint extends Moveable {
         if(!this.ifRotateOverPoint)
             return super.move(T);
 
-        this.rotationR += this.rotationSpeedR*T;
+
+        let previous = this.betta;
         this.alpha += this.rotationSpeedAlpha*T;
         this.betta += this.rotationSpeedBetta*T;
 
-        this.alpha %= Math.PI*2;
-        this.betta %= Math.PI*2;
+        if (!(0 < this.betta && this.betta < Math.PI)) {
+            this.betta = previous;
+        }
 
         const xzR = Math.sin(this.betta)*this.rotationR,
             y = this.rotationPoint.y + Math.cos(this.betta)*this.rotationR,
             x = this.rotationPoint.x + Math.cos(this.alpha)*xzR,
             z = this.rotationPoint.z + Math.sin(this.alpha)*xzR;
 
-        //console.log(`X=${x}, Y=${y}, Z=${z}, Alpha=${this.alpha*360/Math.PI/2}, Betta=${this.betta*360/Math.PI/2}`);
         this.setPosition(new Point(x, y, z));
+        this.lastDelta = T;
         return this;
     }
 
@@ -82,21 +83,20 @@ class RotatableOverPoint extends Moveable {
     }
 
     decreaseRotationSpeedAlpha() {
-        const speed = this.rotationSpeedAlpha - angleSpeedStep;
-        this.rotationSpeedAlpha = speed > 0 ? speed : 0;
+        this.rotationSpeedAlpha -= angleSpeedStep;
+
     }
 
     decreaseRotationSpeedBetta() {
-        const speed = this.rotationSpeedBetta - angleSpeedStep;
-        this.rotationSpeedBetta = speed > 0 ? speed : 0;
+        this.rotationSpeedBetta -= angleSpeedStep;
     }
 
     increaseRotationSpeedR() {
-        this.rotationSpeedR += translationInitSpeed;
+        this.rotationR += translationInitSpeed*this.lastDelta*10;
     }
 
     decreaseRotationSpeedR() {
-        this.rotationSpeedR -= angleSpeedStep;
+        this.rotationR -= translationInitSpeed*this.lastDelta*10;
     }
 
 }

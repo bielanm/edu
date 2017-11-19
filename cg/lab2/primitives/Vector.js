@@ -6,4 +6,7 @@ class Vector {
         this.z = z;
     }
 
+    toString() {
+        return `X=${this.x}, Y=${this.y}, Z=${this.y}`;
+    }
 }

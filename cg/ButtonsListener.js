@@ -13,7 +13,11 @@ class ButtonsListener {
         this.elements.forEach((element) => {
             const div = document.createElement('div');
 
-            const input = document.createElement('input');
+            let input = null;
+            let toggleInput = null;
+            let colorInput = null;
+
+            input = document.createElement('input');
             input.id = element.id;
             input.type = 'radio';
             input.name = 'buttons-listener';
@@ -28,11 +32,12 @@ class ButtonsListener {
             if(element.color) {
                 const { toggled, label } = element.color;
 
-                let toggleInput = null;
+                toggleInput = null;
                 if(toggled) {
                     toggleInput = document.createElement('input');
                     toggleInput.id = `${element.id}Toggler`;
                     toggleInput.type = 'checkbox';
+                    toggleInput.checked = element.color.initToggle;
                     toggleInput.onchange = (event) => {
                         if(this.target != element) return;
 
@@ -50,10 +55,12 @@ class ButtonsListener {
                 }
 
 
-                const colorInput = document.createElement('input');
+                colorInput = document.createElement('input');
                 colorInput.id = `${element.id}Color`;
                 colorInput.type = 'color';
-                colorInput.value= '#ff0000';
+
+                const { r, g, b } = element.color.initColor;
+                colorInput.value = rgbToHex(r, g, b);
                 colorInput.onchange = (event) => {
                     if(this.target != element) return;
 
@@ -63,7 +70,7 @@ class ButtonsListener {
                     const { onChange } = this.target.color;
 
                     if(onChange)
-                        onChange(event);
+                        onChange(hexToRGB(colorInput.value));
                 };
                 div.appendChild(colorInput);
             }

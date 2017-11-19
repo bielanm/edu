@@ -80,4 +80,26 @@ class Surface extends Figure {
         this.getSurfacePoints(this.f, this.leftDown, this.rightUp, vector);
     }
 
+
+    getLightingNormal() {
+        const { accuracy } = this,
+            points = [];
+
+        for(let i = 0; i < accuracy; i++) {
+
+            for(let j = 0; j < accuracy; j++) {
+                points.push(0, 0, 0);
+                points.push(0, 0, 0);
+            }
+            for(let j = accuracy; j > 0; j--) {
+                points.push(0, 0, 0);
+                points.push(0, 0, 0);
+            }
+
+            points.push(0, 0, 0);
+            points.push(0, 0, 0);
+        }
+
+        return points;
+    }
 }

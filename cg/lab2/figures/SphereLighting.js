@@ -1,8 +1,8 @@
 
-class Lighting extends RotatableOverPoint {
+class SphereLighting extends Sphere {
 
-    constructor() {
-        super();
+    constructor(R) {
+        super('lighting', R, 50);
         this.ambientColor = new Color(255, 255, 255, 1);
         this.directionalColor = new Color(0, 0, 0, 1);
         this.direction = new Vector(1, 0, 0);
@@ -58,5 +58,28 @@ class Lighting extends RotatableOverPoint {
         this.direction = new Vector(this.rotationPoint.x-x, this.rotationPoint.y-y, this.rotationPoint.z-z);
         this.normalize();
         return this;
+    }
+
+    getLightingNormal(projection = [1, 1, 1]) {
+        const { accuracy, R } = this,
+            array = [],
+            [xP, yP, zP] = projection;
+
+        for(let i = 0; i <= accuracy; i++) {
+            const alpha = 2*Math.PI*i/accuracy,
+                nextAlpha = 2*Math.PI*(i+1)/accuracy;
+            for(let j = 0; j <= accuracy; j++) {
+                const betta = Math.PI*j/accuracy,
+                    Rxz = R*Math.sin(betta),
+                    y = R*Math.cos(betta),
+                    x1 = Rxz*Math.sin(alpha),
+                    z1 = Rxz*Math.cos(alpha),
+                    x2 = Rxz*Math.sin(nextAlpha),
+                    z2 = Rxz*Math.cos(nextAlpha);
+
+                array.push(new Vector(-x1*xP, -y*yP, -z1*zP), new Vector(-x2*xP, -y*yP, -z2*zP));
+            }
+        }
+        return array.pushReduce((vector) => [vector.x, vector.y, vector.z]);
     }
 }

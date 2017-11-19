@@ -9,7 +9,6 @@ class Color {
 
     getOrigin() {
         const { r, g, b, a} = this;
-
         return { r: Math.floor(255*r), g: Math.floor(255*g), b: Math.floor(255*b), a }
     }
 }

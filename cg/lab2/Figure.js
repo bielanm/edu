@@ -64,6 +64,14 @@ class Figure extends RotatableOverPoint {
         return this;
     }
 
+    getColor() {
+        return this.color;
+    }
+
+    toggleTexture() {
+        this.isTexture = !this.isTexture;
+    }
+
     getTextureURL() {
         if(this.isTexture) {
             return this.texture;
