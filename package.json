@@ -1,0 +1,7 @@
+{
+  "name": "edu",
+  "version": "1.0.0",
+  "dependencies": {
+    "chalk": "^2.4.1"
+  }
+}
