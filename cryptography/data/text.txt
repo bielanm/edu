@@ -1,0 +1,6 @@
+This is the JCrypTool sample file.
+
+You can use this file for a fast start with JCrypTool, e.g. by
+encrypting or digitally signing it using the 'Algorithms' menu,
+or by applying one of the analysis offered in the
+'Analysis' menu.
